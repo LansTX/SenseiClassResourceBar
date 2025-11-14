@@ -102,6 +102,7 @@ end
 
 -- Power types that should show discrete ticks
 local tickedPowerTypes = {
+    [Enum.PowerType.ArcaneCharges] = true,
     [Enum.PowerType.Chi] = true,
     [Enum.PowerType.ComboPoints] = true,
     [Enum.PowerType.Essence] = true,
@@ -263,7 +264,7 @@ barConfigs.secondary = {
         -- Mage: spec-based
         if class == "MAGE" then
             local spec = GetSpecializationInfo(specID)
-            if spec == 64 then -- Arcane
+            if spec == 62 then -- Arcane
                 return Enum.PowerType.ArcaneCharges
             else -- Fire / Frost
                 return nil
