@@ -271,6 +271,19 @@ barConfigs.secondary = {
             return maxHealth, stagger, stagger, "number"
         end
 
+        -- Handle Death Knight Runes separately
+        if resource == Enum.PowerType.Runes then
+            local totalRunes = UnitPowerMax("player", resource)
+            local readyRunes = 0
+            for i = 1, UnitPowerMax("player", resource) do
+                local runeReady = select(3, GetRuneCooldown(i))
+                if runeReady then
+                    readyRunes = readyRunes + 1
+                end
+            end
+            return totalRunes, readyRunes, readyRunes, "number"
+        end
+
         -- Regular secondary resource types
         local current = UnitPower("player", resource)
         local max = UnitPowerMax("player", resource)
@@ -417,6 +430,18 @@ local function CreateBarInstance(config, parent)
         local color = PowerBarColor[resource] or PowerBarColor["MANA"]
         if resource == "STAGGER" then
             color = { r = 0.5216, g = 1.0, b = 0.5216 }
+        elseif resource == Enum.PowerType.Runes then
+            local spec = GetSpecialization()
+            local specID = GetSpecializationInfo(spec)
+
+            if specID == 250 then -- Blood
+                color = { r = 1, g = 0.2, b = 0.3 }
+            elseif specID == 251 then -- Frost
+                color = { r = 0.0, g = 0.6, b = 1.0 }
+            elseif specID == 252 then -- Unholy
+                color = { r = 0.1, g = 1.0, b = 0.1 }
+            end
+            -- Else fallback on Blizzard Runes color, grey...
         end
         self.statusBar:SetStatusBarColor(color.r, color.g, color.b)
     end
@@ -652,6 +677,7 @@ local function CreateBarInstance(config, parent)
     -- EVENTS
     frame:RegisterEvent("PLAYER_ENTERING_WORLD")
     frame:RegisterEvent("UNIT_POWER_UPDATE")
+    frame:RegisterEvent("RUNE_POWER_UPDATE")
     frame:RegisterEvent("UNIT_MAXPOWER")
     frame:RegisterEvent("UPDATE_SHAPESHIFT_FORM")
     frame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
@@ -672,13 +698,14 @@ local function CreateBarInstance(config, parent)
                 self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
                 self:UpdateDisplay()
 
-        elseif (event == "UNIT_POWER_UPDATE" or event == "UNIT_MAXPOWER") and arg1 == "player" then
-
+        elseif ((event == "UNIT_POWER_UPDATE" or event == "UNIT_MAXPOWER") and arg1 == "player")
+                or event == "RUNE_POWER_UPDATE" then
+            
             self:UpdateDisplay()
             if event == "UNIT_MAXPOWER" then
                 self:UpdateTicks()
             end
-            
+
         end
     end)
 
