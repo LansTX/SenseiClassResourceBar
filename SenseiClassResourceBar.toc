@@ -3,7 +3,7 @@
 ## Notes: Separate resource bar for some classes
 ## Author: Sensei
 ## Version: 1.0
-## SavedVariables: ResourceBarDB, SecondaryResourceBarDB
+## SavedVariables: SenseiClassResourceBarDB
 
 Libs\LibStub\LibStub.lua
 Libs\LibEditMode\embed.xml
