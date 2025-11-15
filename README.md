@@ -56,6 +56,7 @@ Each bar (Primary & Secondary) has its own configuration:
 *   ✏️ Customizable **font**, **size**, and **outline**
 *   🖼 Multiple **foreground textures**, **backgrounds**, and **border styles**
 *   🎯 Text alignment (Left / Center / Right)
+*   ⭐ Support for LibSharedMedia-3.0
 
 ### **Behavior**
 
