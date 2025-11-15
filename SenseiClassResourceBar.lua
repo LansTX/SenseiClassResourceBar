@@ -1,9 +1,5 @@
 local addonName, addonTable = ...
 
-if not SenseiClassResourceBarDB then
-    SenseiClassResourceBarDB = {}
-end
-
 ------------------------------------------------------------
 -- LIBSHAREDMEDIA INTEGRATION
 ------------------------------------------------------------
@@ -1071,7 +1067,7 @@ local function CreateBarInstance(config, parent)
     frame:SetScript("OnEvent", function(self, event, arg1)
         if event == "PLAYER_ENTERING_WORLD"
             or event == "UPDATE_SHAPESHIFT_FORM"
-            or event == "PLAYER_SPECIALIZATION_CHANGED" then
+            or (event == "PLAYER_SPECIALIZATION_CHANGED" and arg1 == "player") then
 
             self:ApplyLayout()
             self:ApplyVisibilitySettings()
@@ -1596,8 +1592,20 @@ local function InitializeBar(config)
     return frame
 end
 
+local SCRB = CreateFrame("Frame")
+SCRB:RegisterEvent("ADDON_LOADED")
+SCRB:SetScript("OnEvent", function(_, event, arg1)
+    if event == "ADDON_LOADED" and arg1 == addonName then
+        if not SenseiClassResourceBarDB then
+            SenseiClassResourceBarDB = {}
+end
+
 -- Initialize primary bar
 InitializeBar(barConfigs.primary)
 
 -- Initialize secondary bar
 InitializeBar(barConfigs.secondary)
+
+        InitializeBar(barConfigs.healthBar)
+    end
+end)
