@@ -131,30 +131,36 @@ local availableTextAlignmentStyles = {
 
 -- Available mask and border styles
 local maskAndBorderStyles = {
-    ["Thin"] = {
-        mask = [[Interface\AddOns\SenseiClassResourceBar\Textures\white.png]],
-        border = LSM:Fetch(LSM.MediaType.BORDER, "SCRB Border Thin"),
+    ["1 Pixel"] = {
+        type = "fixed",
+        thickness = 1,
     },
-    ["Bold"] = {
-        mask = [[Interface\AddOns\SenseiClassResourceBar\Textures\white.png]],
-        border = LSM:Fetch(LSM.MediaType.BORDER, "SCRB Border Bold"),
+    ["Thin"] = {
+        type = "fixed",
+        thickness = 2,
     },
     ["Slight"] = {
-        mask = [[Interface\AddOns\SenseiClassResourceBar\Textures\white.png]],
-        border = LSM:Fetch(LSM.MediaType.BORDER, "SCRB Border Slight"),
+        type = "fixed",
+        thickness = 3,
+    },
+    ["Bold"] = {
+        type = "fixed",
+        thickness = 5,
     },
     ["Blizzard Classic"] = {
+        type = "texture",
         mask = [[Interface\AddOns\SenseiClassResourceBar\Textures\BarBorders\blizzard-classic-mask.png]],
         border = LSM:Fetch(LSM.MediaType.BORDER, "SCRB Border Blizzard Classic"),
     },
     ["None"] = {
-        mask = [[Interface\AddOns\SenseiClassResourceBar\Textures\white.png]],
         border = [[]],
     }
     -- Add more styles here as needed
     -- ["style-name"] = {
-    --     mask = "path/to/mask.png",
-    --     border = "path/to/border.png",
+    --     type = "", -- texture or fixed. Other value will not be displayed (i.e hidden)
+    --     mask = "path/to/mask.png", -- Default to the whole status bar 
+    --     border = "path/to/border.png", -- Only for texture type
+    --     thickness = 1, -- Only for fixed type
     -- },
 }
 
@@ -971,7 +977,7 @@ local function CreateBarInstance(config, parent)
             self.mask = self.statusBar:CreateMaskTexture()
         end
 
-        self.mask:SetTexture(style.mask)
+        self.mask:SetTexture(style.mask or [[Interface\AddOns\SenseiClassResourceBar\Textures\white.png]])
         self.mask:SetPoint("CENTER", self.statusBar, "CENTER")
         self.mask:SetSize(verticalOrientation and height or width, verticalOrientation and width or height)
         self.mask:SetRotation(verticalOrientation and math.rad(90) or 0)
@@ -979,11 +985,64 @@ local function CreateBarInstance(config, parent)
         self.statusBar:GetStatusBarTexture():AddMaskTexture(self.mask)
         self.background:AddMaskTexture(self.mask)
 
-        self.border:SetTexture(style.border)
-        self.border:ClearAllPoints()
-        self.border:SetPoint("CENTER", self.statusBar, "CENTER")
-        self.border:SetSize(verticalOrientation and height or width, verticalOrientation and width or height)
-        self.border:SetRotation(verticalOrientation and math.rad(90) or 0)
+        if style.type == "fixed" then
+            local bordersInfo = {
+                top    = { "TOPLEFT", "TOPRIGHT" },
+                bottom = { "BOTTOMLEFT", "BOTTOMRIGHT" },
+                left   = { "TOPLEFT", "BOTTOMLEFT" },
+                right  = { "TOPRIGHT", "BOTTOMRIGHT" },
+            }
+
+            if not self.fixedThicknessBorder then
+                self.fixedThicknessBorder = {}
+                for edge, _ in pairs(bordersInfo) do
+                    local t = self:CreateTexture(nil, "OVERLAY")
+                    t:SetColorTexture(0, 0, 0, 1)
+                    t:SetDrawLayer("OVERLAY")
+                    self.fixedThicknessBorder[edge] = t
+                end
+            end
+
+            self.border:Hide()
+
+            -- Linear multiplier: for example, thickness grows 1x at scale 1, 2x at scale 2
+            local thickness = (style.thickness or 1) * math.max(data.scale or defaults.scale, 1)
+            thickness = math.max(thickness, 1)
+
+            for edge, t in pairs(self.fixedThicknessBorder) do
+                local points = bordersInfo[edge]
+                t:ClearAllPoints()
+                t:SetPoint(points[1], self, points[1])
+                t:SetPoint(points[2], self, points[2])
+                if edge == "top" or edge == "bottom" then
+                    t:SetHeight(thickness)
+                else
+                    t:SetWidth(thickness)
+                end
+                t:Show()
+            end
+        elseif style.type == "texture" then
+            self.border:Show()
+            self.border:SetTexture(style.border)
+            self.border:ClearAllPoints()
+            self.border:SetPoint("CENTER", self.statusBar, "CENTER")
+            self.border:SetSize(verticalOrientation and height or width, verticalOrientation and width or height)
+            self.border:SetRotation(verticalOrientation and math.rad(90) or 0)
+
+            if self.fixedThicknessBorder then
+                for _, t in pairs(self.fixedThicknessBorder) do
+                    t:Hide()
+                end
+            end
+        else
+            self.border:Hide()
+
+            if self.fixedThicknessBorder then
+                for _, t in pairs(self.fixedThicknessBorder) do
+                    t:Hide()
+                end
+            end
+        end
     end
 
     function frame:UpdateTicksLayout(layoutName, resource, max)
