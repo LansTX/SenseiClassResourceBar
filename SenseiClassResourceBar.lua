@@ -1950,7 +1950,7 @@ SCRB:SetScript("OnEvent", function(_, event, arg1)
         end
 
         for _, config in pairs(barConfigs) do
-            InitializeBar(config, config.frameLevel or 0)
+            InitializeBar(config, (config.frameLevel or 0) + 501) -- 501 so it is above the action bars
         end
     end
 end)
