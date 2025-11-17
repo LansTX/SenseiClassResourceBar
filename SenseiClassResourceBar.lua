@@ -201,13 +201,13 @@ barConfigs.primary = {
     dbName = "PrimaryResourceBarDB",
     editModeName = "Primary Resource Bar",
     frameName = "PrimaryResourceBar",
-    frameLevel = 2,
+    frameLevel = 3,
     defaultValues = {
         point = "CENTER",
         x = 0,
         y = 0,
         showManaAsPercent = false,
-        usePrimaryResourceAtlas = false,
+        useResourceAtlas = false,
     },
     getResource = function()
         local playerClass = select(2, UnitClass("player"))
@@ -260,7 +260,7 @@ barConfigs.primary = {
             return primaryResources[playerClass]
         end
     end,
-    getValue = function(resource, config, data)
+    getValue = function(resource, _, data)
         if not resource then return nil, nil, nil, nil end
 
         local current = UnitPower("player", resource)
@@ -306,18 +306,18 @@ barConfigs.primary = {
                 order = 63,
                 name = "Use Resource Foreground",
                 kind = LEM.SettingType.Checkbox,
-                default = defaults.usePrimaryResourceAtlas,
+                default = defaults.useResourceAtlas,
                 get = function(layoutName)
                     local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    if data and data.usePrimaryResourceAtlas ~= nil then
-                        return data.usePrimaryResourceAtlas
+                    if data and data.useResourceAtlas ~= nil then
+                        return data.useResourceAtlas
                     else
-                        return defaults.usePrimaryResourceAtlas
+                        return defaults.useResourceAtlas
                     end
                 end,
                 set = function(layoutName, value)
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
-                    SenseiClassResourceBarDB[dbName][layoutName].usePrimaryResourceAtlas = value
+                    SenseiClassResourceBarDB[dbName][layoutName].useResourceAtlas = value
                     frame:ApplyForegroundSettings(layoutName)
                 end,
             },
@@ -330,7 +330,7 @@ barConfigs.secondary = {
     dbName = "SecondaryResourceBarDB",
     editModeName = "Secondary Resource Bar",
     frameName = "SecondaryResourceBar",
-    frameLevel = 1,
+    frameLevel = 2,
     defaultValues = {
         point = "CENTER",
         x = 0,
@@ -338,14 +338,14 @@ barConfigs.secondary = {
         hideBlizzardSecondaryResourceUi = false,
         showTicks = true,
         tickThickness = 1,
-        useSecondaryResourceAtlas = false,
+        useResourceAtlas = false,
     },
     getResource = function()
         local playerClass = select(2, UnitClass("player"))
         local secondaryResources = {
             ["DEATHKNIGHT"] = Enum.PowerType.Runes,
             ["DEMONHUNTER"] = {
-                [1480] = "SOUL", -- Devourer
+                [1480] = "SOUL_FRAGMENTS", -- Devourer
             },
             ["DRUID"]       = {
                 [1]    = Enum.PowerType.ComboPoints, -- Cat
@@ -387,7 +387,7 @@ barConfigs.secondary = {
             return secondaryResources[playerClass]
         end
     end,
-    getValue = function(resource, config, data)
+    getValue = function(resource, frame)
         if not resource then return nil, nil, nil, nil end
 
         if resource == "STAGGER" then
@@ -396,13 +396,25 @@ barConfigs.secondary = {
             return maxHealth, stagger, stagger, "number"
         end
 
-        if resource == "SOUL" then
+        if resource == "SOUL_FRAGMENTS" then
             -- The hack needs the PlayerFrame
             if not PlayerFrame:IsShown() then return nil, nil, nil, nil end
 
             local current = DemonHunterSoulFragmentsBar:GetValue() 
             local _, max = DemonHunterSoulFragmentsBar:GetMinMaxValues() -- Secret values
 
+            if not frame._SCRB_Soul_Fragments_hooked then
+                frame:SetScript("OnUpdate", function(_, delta)
+                    frame.elapsed = frame.elapsed + delta
+                    if frame.elapsed >= frame.updateInterval then
+                        frame.elapsed = 0
+                        frame:UpdateDisplay()
+                    end
+                end)
+
+                frame._SCRB_Soul_Fragments_hooked = true
+            end
+            
             return max, current, current, "number"
         end
 
@@ -521,18 +533,130 @@ barConfigs.secondary = {
                 order = 63,
                 name = "Use Resource Foreground",
                 kind = LEM.SettingType.Checkbox,
-                default = defaults.useSecondaryResourceAtlas,
+                default = defaults.useResourceAtlas,
                 get = function(layoutName)
                     local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    if data and data.useSecondaryResourceAtlas ~= nil then
-                        return data.useSecondaryResourceAtlas
+                    if data and data.useResourceAtlas ~= nil then
+                        return data.useResourceAtlas
                     else
-                        return defaults.useSecondaryResourceAtlas
+                        return defaults.useResourceAtlas
                     end
                 end,
                 set = function(layoutName, value)
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
-                    SenseiClassResourceBarDB[dbName][layoutName].useSecondaryResourceAtlas = value
+                    SenseiClassResourceBarDB[dbName][layoutName].useResourceAtlas = value
+                    frame:ApplyForegroundSettings(layoutName)
+                end,
+            },
+        }
+    end,
+}
+
+
+-- TERTIARY RESOURCE BAR
+barConfigs.tertiary = {
+    dbName = "tertiaryResourceBarDB",
+    editModeName = "Ebon Might Resource Bar",
+    frameName = "TertiaryResourceBar",
+    frameLevel = 1,
+    defaultValues = {
+        point = "CENTER",
+        x = 0,
+        y = -80,
+        useResourceAtlas = false,
+    },
+    loadPredicate = function()
+        local playerClass = select(2, UnitClass("player"))
+        return playerClass == "EVOKER"
+    end,
+    getResource = function()
+        local playerClass = select(2, UnitClass("player"))
+        local tertiaryResources = {
+            ["DEATHKNIGHT"] = nil,
+            ["DEMONHUNTER"] = nil,
+            ["DRUID"]       = nil,
+            ["EVOKER"]      = {
+                [1473] = "EBON_MIGHT",
+            },
+            ["HUNTER"]      = nil,
+            ["MAGE"]        = nil,
+            ["MONK"]        = nil,
+            ["PALADIN"]     = nil,
+            ["PRIEST"]      = nil,
+            ["ROGUE"]       = nil,
+            ["SHAMAN"]      = nil,
+            ["WARLOCK"]     = nil,
+            ["WARRIOR"]     = nil,
+        }
+
+        local spec = GetSpecialization()
+        local specID = GetSpecializationInfo(spec)
+
+        -- Druid: form-based
+        if playerClass == "DRUID" then
+            local formID = GetShapeshiftFormID()
+            return tertiaryResources[playerClass][formID or 0]
+        end
+
+        if type(tertiaryResources[playerClass]) == "table" then
+            return tertiaryResources[playerClass][specID]
+        else 
+            return tertiaryResources[playerClass]
+        end
+    end,
+    getValue = function(resource, frame)
+        if not resource then return nil, nil, nil, nil end
+
+        if resource == "EBON_MIGHT" then
+            -- The hack needs the PlayerFrame
+            if not PlayerFrame:IsShown() then return nil, nil, nil, nil end
+
+            local current = EvokerEbonMightBar:GetValue() 
+            local _, max = EvokerEbonMightBar:GetMinMaxValues() -- Secret values
+
+            if not frame._SCRB_Ebon_Might_hooked then
+                frame:SetScript("OnUpdate", function(_, delta)
+                    frame.elapsed = frame.elapsed + delta
+                    if frame.elapsed >= frame.updateInterval then
+                        frame.elapsed = 0
+                        frame:UpdateDisplay()
+                    end
+                end)
+
+                frame._SCRB_Ebon_Might_hooked = true
+            end
+
+            return max, current, current, "timer", 0
+        end
+
+        -- Regular secondary resource types
+        local current = UnitPower("player", resource)
+        local max = UnitPowerMax("player", resource)
+        if max <= 0 then return nil, nil, nil, nil end
+
+        return max, current, current, "number"
+    end,
+    getBarColor = function(resource, frame)
+        return frame:GetResourceColor(resource)
+    end,
+    lemSettings = function(dbName, defaults, frame)
+        return {
+            {
+                order = 63,
+                name = "Use Resource Foreground",
+                kind = LEM.SettingType.Checkbox,
+                default = defaults.useResourceAtlas,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if data and data.useResourceAtlas ~= nil then
+                        return data.useResourceAtlas
+                    else
+                        return defaults.useResourceAtlas
+                    end
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].useResourceAtlas = value
                     frame:ApplyForegroundSettings(layoutName)
                 end,
             },
@@ -674,7 +798,7 @@ local function CreateBarInstance(config, parent, frameLevel)
 
     -- STATE
     frame.smoothEnabled = false
-    frame.updateInterval = 0.05
+    frame.updateInterval = 0.1
     frame.elapsed = 0
 
     -- Fragmented powers (Runes, Essences) specific visual elements
@@ -858,7 +982,7 @@ local function CreateBarInstance(config, parent, frameLevel)
 
         if resource == "STAGGER" then
             color = GetPowerBarColor("STAGGER").green
-        elseif resource == "SOUL" then
+        elseif resource == "SOUL_FRAGMENTS" then
             -- Different color during Void Metamorphosis
             if DemonHunterSoulFragmentsBar and DemonHunterSoulFragmentsBar.CollapsingStarBackground:IsShown() then
                 color = { r = 0.037, g = 0.220, b = 0.566 }
@@ -910,7 +1034,7 @@ local function CreateBarInstance(config, parent, frameLevel)
             return
         end
 
-        local max, current, displayValue, valueType = self.config.getValue(resource, self.config, data)
+        local max, current, displayValue, valueType, precision = self.config.getValue(resource, frame, data)
         if not max then
             if not LEM:IsInEditMode() then
                 self:Hide()
@@ -923,6 +1047,8 @@ local function CreateBarInstance(config, parent, frameLevel)
 
         if valueType == "percent" then
             self.TextValue:SetText(string.format("%.0f%%", displayValue))
+        elseif valueType == "timer" then
+            self.TextValue:SetText(string.format("%." .. (precision or 1) .. "f", displayValue))
         else
             self.TextValue:SetText(AbbreviateNumbers(displayValue))
         end
@@ -1204,7 +1330,7 @@ local function CreateBarInstance(config, parent, frameLevel)
         
         local resource = self.config.getResource()
         local color = self.config.getBarColor(resource, frame)
-        if (data.usePrimaryResourceAtlas == true or data.useSecondaryResourceAtlas == true) and (color.atlasElementName or color.atlas) then
+        if data.useResourceAtlas == true and (color.atlasElementName or color.atlas) then
             if color.atlasElementName then
                 if color.hasClassResourceVariant then
                     fgTexture = "UI-HUD-UnitFrame-Player-PortraitOn-ClassResource-Bar-"..color.atlasElementName
@@ -1224,7 +1350,7 @@ local function CreateBarInstance(config, parent, frameLevel)
             end
         end
 
-        if (data.usePrimaryResourceAtlas == true or data.useSecondaryResourceAtlas == true) and (color.atlasElementName or color.atlas) then
+        if data.useResourceAtlas == true and (color.atlasElementName or color.atlas) then
             self.StatusBar:SetStatusBarColor(1, 1, 1);
         else
             self.StatusBar:SetStatusBarColor(color.r or 1, color.g or 1, color.b or 1);
@@ -2061,7 +2187,9 @@ SCRB:SetScript("OnEvent", function(_, event, arg1)
         end
 
         for _, config in pairs(barConfigs) do
-            InitializeBar(config, ((config.frameLevel or 0) * 10) + 501) -- 501 so it is above the action bars
+            if config.loadPredicate == nil or (type(config.loadPredicate) == "function" and config.loadPredicate(config) == true) then
+                InitializeBar(config, ((config.frameLevel or 0) * 10) + 501) -- 501 so it is above the action bars
+            end
         end
     end
 end)
