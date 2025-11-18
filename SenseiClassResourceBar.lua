@@ -281,8 +281,8 @@ barConfigs.primary = {
             return max, current, current, "number"
         end
     end,
-    getBarColor = function(frame,  _, resource)
-        return frame:GetResourceColor(resource)
+    getBarColor = function(_, _, resource)
+        return addonTable:GetOverrideResourceColor(resource)
     end,
     lemSettings = function(dbName, defaults, frame)
         return {
@@ -307,7 +307,7 @@ barConfigs.primary = {
             },
             {
                 order = 63,
-                name = "Use Resource Foreground",
+                name = "Use Resource Foreground And Color",
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.useResourceAtlas,
                 get = function(layoutName)
@@ -467,8 +467,8 @@ barConfigs.secondary = {
 
         return max, current, current, "number"
     end,
-    getBarColor = function(frame, _, resource)
-        return frame:GetResourceColor(resource)
+    getBarColor = function(_, _, resource)
+        return addonTable:GetOverrideResourceColor(resource)
     end,
     lemSettings = function(dbName, defaults, frame)
         return {
@@ -676,8 +676,8 @@ barConfigs.tertiary = {
 
         return max, current, current, "number"
     end,
-    getBarColor = function(frame, _, resource)
-        return frame:GetResourceColor(resource)
+    getBarColor = function(_, _, resource)
+        return addonTable:GetOverrideResourceColor(resource)
     end,
     lemSettings = function(dbName, defaults, frame)
         return {
@@ -728,7 +728,7 @@ barConfigs.healthBar = {
         
         return max, current, current, "number"
     end,
-    getBarColor = function(frame, data)
+    getBarColor = function(_, data)
         local playerClass = select(2, UnitClass("player"))
         
         if data and data.useClassColor == true then
@@ -999,51 +999,6 @@ local function CreateBarInstance(config, parent, frameLevel)
                 end
             end
         end
-    end
-
-    function frame:GetResourceColor(resource)
-        local color = nil
-        
-        local powerName = nil
-        for name, value in pairs(Enum.PowerType) do
-            if value == resource then
-                -- LunarPower -> LUNAR_POWER
-                powerName = name:gsub("(%u)", "_%1"):gsub("^_", ""):upper()
-                break;
-            end
-        end
-
-        if resource == "STAGGER" then
-            color = GetPowerBarColor("STAGGER").green
-        elseif resource == "SOUL_FRAGMENTS" then
-            -- Different color during Void Metamorphosis
-            if DemonHunterSoulFragmentsBar and DemonHunterSoulFragmentsBar.CollapsingStarBackground:IsShown() then
-                color = { r = 0.037, g = 0.220, b = 0.566, atlas = "UF-DDH-CollapsingStar-Bar-Ready" }
-            else 
-                color = { r = 0.278, g = 0.125, b = 0.796, atlas = "UF-DDH-VoidMeta-Bar-Ready" }
-            end
-        elseif resource == Enum.PowerType.Runes then
-            local spec = C_SpecializationInfo.GetSpecialization()
-            local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
-
-            if specID == 250 then -- Blood
-                color = { r = 1, g = 0.2, b = 0.3 }
-            elseif specID == 251 then -- Frost
-                color = { r = 0.0, g = 0.6, b = 1.0 }
-            elseif specID == 252 then -- Unholy
-                color = { r = 0.1, g = 1.0, b = 0.1 }
-            end
-            -- Else fallback on Blizzard Runes color, grey...
-        elseif resource == Enum.PowerType.Essence then
-            color = GetPowerBarColor("FUEL")
-        elseif resource == Enum.PowerType.ComboPoints then
-            color = { r = 0.878, g = 0.176, b = 0.180 }
-        elseif resource == Enum.PowerType.Chi then
-            color = { r = 0.024, g = 0.741, b = 0.784 }
-        end
-
-        -- If not custum, try with power name or id
-        return color or GetPowerBarColor(powerName) or GetPowerBarColor(resource) or { r = 1, g = 1, b = 1 }
     end
 
     function frame:UpdateDisplay(layoutName, force)
@@ -2145,8 +2100,6 @@ end
 ------------------------------------------------------------
 -- INITIALIZE BARS
 ------------------------------------------------------------
-local barInstances = {}
-
 local function InitializeBar(config, frameLevel)
     local defaults = CopyTable(commonDefaults)
     for k, v in pairs(config.defaultValues or {}) do
@@ -2154,7 +2107,6 @@ local function InitializeBar(config, frameLevel)
     end
 
     local frame = CreateBarInstance(config, UIParent, math.max(0, frameLevel or 0))
-    barInstances[config.frameName] = frame
 
     local function OnPositionChanged(frame, layoutName, point, x, y)
         SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
@@ -2221,7 +2173,121 @@ local function InitializeBar(config, frameLevel)
     LEM:AddFrame(frame, OnPositionChanged, defaults)
     LEM:AddFrameSettings(frame, BuildLemSettings(config, frame))
 
+    local buttonSettings = {
+        {
+            text = "Color Settings",
+            click = function() -- Cannot directly close Edit Mode because it is protected
+                if not addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit then
+                    addonTable.prettyPrint('Settings will open after leaving Edit Mode')
+                end
+
+                addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit = true
+
+                if not addonTable._SCRB_EditModeManagerFrame_OnHide_hooked then
+
+                    EditModeManagerFrame:HookScript("OnHide", function()
+                        if addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit == true then
+                            C_Timer.After(0.1, function ()
+                                Settings.OpenToCategory(addonTable.settingsCategory:GetID())
+                            end)
+                            addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit = false
+                        end
+                    end)
+
+                    addonTable._SCRB_EditModeManagerFrame_OnHide_hooked = true
+                end
+            end
+        },
+    }
+
+    if LEM.AddFrameSettingsButtons then
+        LEM:AddFrameSettingsButtons(frame, buttonSettings)
+    else
+        for _, buttonSetting in ipairs(buttonSettings) do
+            LEM:AddFrameSettingsButton(frame, buttonSetting)
+        end
+    end
+
     return frame
+end
+
+function addonTable:GetOverrideResourceColor(resource)
+    local color = addonTable:GetResourceColor(resource)
+
+    local settings = SenseiClassResourceBarDB and SenseiClassResourceBarDB["_Settings"]
+    local powerColors = settings and settings["PowerColors"]
+    local overrideColor = powerColors and powerColors[resource]
+
+    if overrideColor then
+        if overrideColor.r then color.r = overrideColor.r end
+        if overrideColor.g then color.g = overrideColor.g end
+        if overrideColor.b then color.b = overrideColor.b end
+        if overrideColor.a then color.a = overrideColor.a end
+    end
+
+    return color
+end
+
+function addonTable:GetResourceColor(resource)
+    local color = nil
+
+    local powerName = nil
+    for name, value in pairs(Enum.PowerType) do
+        if value == resource then
+            -- LunarPower -> LUNAR_POWER
+            powerName = name:gsub("(%u)", "_%1"):gsub("^_", ""):upper()
+            break;
+        end
+    end
+
+    if resource == "STAGGER" then
+        color = GetPowerBarColor("STAGGER").green
+    elseif resource == "SOUL_FRAGMENTS" then
+        -- Different color during Void Metamorphosis
+        if DemonHunterSoulFragmentsBar and DemonHunterSoulFragmentsBar.CollapsingStarBackground:IsShown() then
+            color = { r = 0.037, g = 0.220, b = 0.566, atlas = "UF-DDH-CollapsingStar-Bar-Ready" }
+        else 
+            color = { r = 0.278, g = 0.125, b = 0.796, atlas = "UF-DDH-VoidMeta-Bar-Ready" }
+        end
+    elseif resource == Enum.PowerType.Runes then
+        local spec = C_SpecializationInfo.GetSpecialization()
+        local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
+
+        if specID == 250 then -- Blood
+            color = { r = 1, g = 0.2, b = 0.3 }
+        elseif specID == 251 then -- Frost
+            color = { r = 0.0, g = 0.6, b = 1.0 }
+        elseif specID == 252 then -- Unholy
+            color = { r = 0.1, g = 1.0, b = 0.1 }
+        end
+        -- Else fallback on Blizzard Runes color, grey...
+    elseif resource == Enum.PowerType.Essence then
+        color = GetPowerBarColor("FUEL")
+    elseif resource == Enum.PowerType.ComboPoints then
+        color = { r = 0.878, g = 0.176, b = 0.180 }
+    elseif resource == Enum.PowerType.Chi then
+        color = { r = 0.024, g = 0.741, b = 0.784 }
+    end
+
+    -- If not custom, try with power name or id
+    return CopyTable(color or GetPowerBarColor(powerName) or GetPowerBarColor(resource) or { r = 1, g = 1, b = 1 })
+end
+
+addonTable.updateBar = function(name)
+    local bar = addonTable.barInstances[name]
+    if not bar then return end
+
+    bar:ApplyLayout()
+end
+
+addonTable.updateBars = function()
+    for name, _ in pairs(addonTable.barInstances) do
+        addonTable.updateBar(name)
+    end
+end
+
+addonTable.prettyPrint = function(...)
+  print("|cffb5a707"..addonName..":|r", ...)
 end
 
 local SCRB = CreateFrame("Frame")
@@ -2232,10 +2298,15 @@ SCRB:SetScript("OnEvent", function(_, event, arg1)
             SenseiClassResourceBarDB = {}
         end
 
+        addonTable.barInstances = addonTable.barInstances or {}
+
         for _, config in pairs(barConfigs) do
             if config.loadPredicate == nil or (type(config.loadPredicate) == "function" and config.loadPredicate(config) == true) then
-                InitializeBar(config, ((config.frameLevel or 0) * 10) + 501) -- 501 so it is above the action bars
+                local frame = InitializeBar(config, ((config.frameLevel or 0) * 10) + 501) -- 501 so it is above the action bars
+                addonTable.barInstances[config.frameName] = frame
             end
         end
+
+        addonTable.SettingsRegistrar()
     end
 end)
