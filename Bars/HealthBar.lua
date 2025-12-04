@@ -1,6 +1,6 @@
 local _, addonTable = ...
 
-local LEM = addonTable.LEM or LibStub("LibEditMode")
+local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
 
 local HealthBarMixin = Mixin({}, addonTable.BarMixin)
 local buildVersion = select(4, GetBuildInfo())
@@ -33,18 +33,18 @@ end
 function HealthBarMixin:GetResourceValue()
     local current = UnitHealth("player")
     local max = UnitHealthMax("player")
-    if max <= 0 then return nil, nil, nil, nil end
+    if max <= 0 then return nil, nil, nil, nil, nil end
 
     local data = self:GetData()
-    if data and data.showHealthAsPercent then
+    if data and (data.textFormat == "Percent" or data.textFormat == "Percent%") then
         -- UnitHealthPercent does not exist prior to Midnight
         if (buildVersion or 0) < 120000 then
-            return max, current, math.floor((current / max) * 100 + 0.5), "percent"
+            return max, max, current, math.floor((current / max) * 100 + 0.5), "percent"
         else
-            return max, current, UnitHealthPercent("player", true, true), "percent"
+            return max, max, current, UnitHealthPercent("player", true, true), "percent"
         end
     else
-        return max, current, current, "number"
+        return max, max, current, current, "number"
     end
 end
 
@@ -54,6 +54,9 @@ function HealthBarMixin:OnLoad()
     self.Frame:RegisterEvent("PLAYER_REGEN_ENABLED")
     self.Frame:RegisterEvent("PLAYER_REGEN_DISABLED")
     self.Frame:RegisterEvent("PLAYER_TARGET_CHANGED")
+    self.Frame:RegisterUnitEvent("UNIT_ENTERED_VEHICLE", "player")
+    self.Frame:RegisterUnitEvent("UNIT_EXITED_VEHICLE", "player")
+    self.Frame:RegisterEvent("PLAYER_MOUNT_DISPLAY_CHANGED")
 end
 
 function HealthBarMixin:OnEvent(event, ...)
@@ -66,7 +69,7 @@ function HealthBarMixin:OnEvent(event, ...)
         self:ApplyLayout()
         self:UpdateDisplay()
 
-    elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_TARGET_CHANGED" then
+    elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" or event == "PLAYER_TARGET_CHANGED" or event == "UNIT_ENTERED_VEHICLE" or event == "UNIT_EXITED_VEHICLE" or event == "PLAYER_MOUNT_DISPLAY_CHANGED" then
 
             self:ApplyVisibilitySettings(nil, event == "PLAYER_REGEN_DISABLED")
             self:UpdateDisplay()
@@ -88,8 +91,8 @@ addonTable.RegistereredBar.HealthBar = {
         x = 0,
         y = 40,
         barVisible = "Hidden",
+        hideHealthOnRole = {},
         hideBlizzardPlayerContainerUi = false,
-        showHealthAsPercent = false,
         useClassColor = true,
     },
     lemSettings = function(bar, defaults)
@@ -97,7 +100,25 @@ addonTable.RegistereredBar.HealthBar = {
 
         return {
             {
-                order = 2,
+                parentId = "Bar Visibility",
+                order = 102,
+                name = "Hide On Role",
+                kind = LEM.SettingType.MultiDropdown,
+                default = defaults.hideHealthOnRole,
+                values = addonTable.availableRoleOptions,
+                hideSummary = true,
+                useOldStyle = true,
+                get = function(layoutName)
+                    return (SenseiClassResourceBarDB[dbName][layoutName] and SenseiClassResourceBarDB[dbName][layoutName].hideHealthOnRole) or defaults.hideHealthOnRole
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].hideHealthOnRole = value
+                end,
+            },
+            {
+                parentId = "Bar Visibility",
+                order = 104,
                 name = "Hide Blizzard UI",
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.hideBlizzardPlayerContainerUi,
@@ -116,26 +137,8 @@ addonTable.RegistereredBar.HealthBar = {
                 end,
             },
             {
-                order = 41,
-                name = "Show As Percent",
-                kind = LEM.SettingType.Checkbox,
-                default = defaults.showHealthAsPercent,
-                get = function(layoutName)
-                    local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    if data and data.showHealthAsPercent ~= nil then
-                        return data.showHealthAsPercent
-                    else
-                        return defaults.showHealthAsPercent
-                    end
-                end,
-                set = function(layoutName, value)
-                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
-                    SenseiClassResourceBarDB[dbName][layoutName].showHealthAsPercent = value
-                    bar:UpdateDisplay(layoutName)
-                end,
-            },
-            {
-                order = 63,
+                parentId = "Bar Style",
+                order = 603,
                 name = "Use Class Color",
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.useClassColor,

@@ -74,13 +74,36 @@ function addonTable:GetResourceColor(resource)
         end
     end
 
-    if resource == "STAGGER" then
-        color = GetPowerBarColor("STAGGER").green
-    elseif resource == "SOUL_FRAGMENTS" then
+    if resource == "STAGGER" or resource == "STAGGER_LOW" or resource == "STAGGER_MEDIUM" or resource == "STAGGER_HEAVY" then
+        local staggerColors = {
+            ["STAGGER_LOW"] = GetPowerBarColor("STAGGER").green,
+            ["STAGGER_MEDIUM"] = GetPowerBarColor("STAGGER").yellow,
+            ["STAGGER_HEAVY"] = GetPowerBarColor("STAGGER").red,
+        }
+
+        if resource == "STAGGER" then
+            local stagger = UnitStagger("player") or 0
+            local maxHealth = UnitHealthMax("player") or 1
+
+            local staggerPercent = (stagger / maxHealth) * 100
+
+            if staggerPercent < 30 then
+                resource = "STAGGER_LOW"
+            elseif staggerPercent < 60 then
+                resource = "STAGGER_MEDIUM"
+            else
+                resource = "STAGGER_HEAVY"
+            end
+        end
+
+        color = staggerColors[resource]
+        settingKey = resource
+    elseif resource == "SOUL_FRAGMENTS" or resource == "SOUL_FRAGMENTS_VOID_META" then
         -- Different color during Void Metamorphosis
-        if DemonHunterSoulFragmentsBar and DemonHunterSoulFragmentsBar.CollapsingStarBackground:IsShown() then
+        if resource == "SOUL_FRAGMENTS_VOID_META" or (DemonHunterSoulFragmentsBar and DemonHunterSoulFragmentsBar.CollapsingStarBackground:IsShown()) then
+            settingKey = "SOUL_FRAGMENTS_VOID_META"
             color = { r = 0.037, g = 0.220, b = 0.566, atlas = "UF-DDH-CollapsingStar-Bar-Ready" }
-        else 
+        else
             color = { r = 0.278, g = 0.125, b = 0.796, atlas = "UF-DDH-VoidMeta-Bar-Ready" }
         end
     elseif resource == Enum.PowerType.Runes or resource == Enum.PowerType.RuneBlood or resource == Enum.PowerType.RuneUnholy or resource == Enum.PowerType.RuneFrost then

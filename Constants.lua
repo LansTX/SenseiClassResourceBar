@@ -3,7 +3,7 @@ local _, addonTable = ...
 addonTable.LSM = LibStub("LibSharedMedia-3.0")
 local LSM = addonTable.LSM
 
-addonTable.LEM = LibStub("LibEditMode")
+addonTable.LEM = LibStub("LibEQOLEditMode-1.0")
 
 ------------------------------------------------------------
 -- LIBSHAREDMEDIA INTEGRATION
@@ -40,18 +40,24 @@ addonTable.TextId = {
 -- COMMON DEFAULTS & DROPDOWN OPTIONS
 ------------------------------------------------------------
 addonTable.commonDefaults = {
+	enableOverlayToggle = true,
     point = "CENTER",
     x = 0,
     y = 0,
     barVisible = "Always Visible",
+    hideWhileMountedOrVehicule = false,
     scale = 1,
     width = 200,
     widthMode = "Manual",
     height = 15,
     fillDirection = "Left to Right",
     smoothProgress = true,
+    fasterUpdates = true,
     showText = true,
+    textFormat = "Current",
+    textPrecision = "12",
     showFragmentedPowerBarText = false,
+    fragmentedPowerBarTextPrecision = "12.3",
     font = LSM:Fetch(LSM.MediaType.FONT, "Friz Quadrata TT"),
     fontSize = 12,
     fontOutline = "OUTLINE",
@@ -67,6 +73,12 @@ addonTable.availableBarVisibilityOptions = {
     { text = "Has Target Selected", isRadio = true },
     { text = "Has Target Selected OR In Combat", isRadio = true },
     { text = "Hidden", isRadio = true },
+}
+
+addonTable.availableRoleOptions = {
+    { text = "Tank", value = "TANK" },
+    { text = "Healer", value = "HEALER" },
+    { text = "DPS", value = "DAMAGER" },
 }
 
 addonTable.availableWidthModes = {
@@ -86,6 +98,20 @@ addonTable.availableOutlineStyles = {
     { text = "NONE", isRadio = true },
     { text = "OUTLINE", isRadio = true },
     { text = "THICKOUTLINE", isRadio = true },
+}
+
+addonTable.availableTextFormats = {
+    { text = "Current", isRadio = true },
+    { text = "Current / Maximum", isRadio = true },
+    { text = "Percent", isRadio = true },
+    { text = "Percent%", isRadio = true },
+}
+
+addonTable.availableTextPrecisions = {
+    { text = "12", isRadio = true },
+    { text = "12.3", isRadio = true },
+    { text = "12.34", isRadio = true },
+    { text = "12.345", isRadio = true },
 }
 
 addonTable.availableTextAlignmentStyles = {
@@ -155,6 +181,6 @@ addonTable.tickedPowerTypes = {
 
 -- Power types that are fragmented (multiple independent segments)
 addonTable.fragmentedPowerTypes = {
-    --[Enum.PowerType.Essence] = true,
+    [Enum.PowerType.Essence] = true,
     [Enum.PowerType.Runes] = true,
 }

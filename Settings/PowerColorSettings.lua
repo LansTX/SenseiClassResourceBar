@@ -78,8 +78,16 @@ SCRBPowerColorSettingsMixin = {
 			power = Enum.PowerType.Chi,
 		},
 		{
-			text = "Stagger",
-			power = "STAGGER",
+			text = "Low Stagger",
+			power = "STAGGER_LOW",
+		},
+		{
+			text = "Medium Stagger",
+			power = "STAGGER_MEDIUM",
+		},
+		{
+			text = "High Stagger",
+			power = "STAGGER_HEAVY",
 		},
 		{
 			text = "Arcane Charges",
@@ -88,6 +96,10 @@ SCRBPowerColorSettingsMixin = {
 		{
 			text = "Soul Fragments",
 			power = "SOUL_FRAGMENTS",
+		},
+		{
+			text = "Soul Fragments Void Meta.",
+			power = "SOUL_FRAGMENTS_VOID_META",
 		},
 		{
 			text = "Ebon Might",

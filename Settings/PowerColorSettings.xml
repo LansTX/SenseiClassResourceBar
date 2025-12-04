@@ -3,7 +3,7 @@
 	<Script file="PowerColorSettings.lua"/>
 
 	<Frame name="SCRBPowerColorSettings" mixin="SCRBPowerColorSettingsMixin" virtual="true">
-		<Size x="200" y="630"/>
+		<Size x="200" y="720"/>
 		<Layers>
 			<Layer level="ARTWORK">
 				<FontString parentKey="Header" inherits="GameFontNormal" justifyH="LEFT" text="Power Color">

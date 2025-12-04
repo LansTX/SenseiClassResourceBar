@@ -1,13 +1,14 @@
 local _, addonTable = ...
 
 local LSM = addonTable.LSM or LibStub("LibSharedMedia-3.0")
-local LEM = addonTable.LEM or LibStub("LibEditMode")
+local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
 
 ------------------------------------------------------------
 -- YOU SHOULD NOT USE DIRECTLY THIS MIXIN -- YOU NEED TO OVERWRITE SOME METHODS
 ------------------------------------------------------------
 
 local BarMixin = {}
+local buildVersion = select(4, GetBuildInfo())
 
 ------------------------------------------------------------
 -- BAR FACTORY
@@ -65,6 +66,7 @@ function BarMixin:Init(config, parent, frameLevel)
 
     -- STATE
     self.smoothEnabled = false
+    self.fasterUpdates = false
 
     -- Fragmented powers (Runes, Essences) specific visual elements
     self.FragmentedPowerBars = {}
@@ -180,12 +182,13 @@ end
 
 --- @param _ string|number|nil The value returned by BarMixin:GetResource()
 --- @return number|nil Max used for the status bar
+--- @return number|nil MaxDisplayValue Value to display as text
 --- @return number|nil Value used for the status bar progression
 --- @return number|nil DisplayValue Value to display as text
---- @return string|nil ValueType Type for the display, "percent", "number", "timer"
+--- @return string|nil ValueType Type for the display, "percent", "number", "custom"
 --- @return number|nil precision If needed by the format
 function BarMixin:GetResourceValue(_)
-    return nil, nil, nil, nil, nil
+    return nil, nil, nil, nil, nil, nil
 end
 
 function BarMixin:OnLoad()
@@ -196,21 +199,21 @@ end
 function BarMixin:OnEvent(event, ...)
 end
 
--- You should handle what to change here too and set self.smoothEnabled to true
-function BarMixin:EnableSmoothProgress()
-    self.smoothEnabled = true
+-- You should handle what to change here too and set self.fasterUpdates to true
+function BarMixin:EnableFasterUpdates()
+    self.fasterUpdates = true
     self.Frame:SetScript("OnUpdate", function(_, delta)
         self.Frame.elapsed = (self.Frame.elapsed or 0) + delta
-        if self.Frame.elapsed >= 0.01 then
+        if self.Frame.elapsed >= 0.05 then
             self.Frame.elapsed = 0
             self:UpdateDisplay()
         end
     end)
 end
 
--- You should handle what to change here too and set self.smoothEnabled to false
-function BarMixin:DisableSmoothProgress()
-    self.smoothEnabled = false
+-- You should handle what to change here too and set self.fasterUpdates to false
+function BarMixin:DisableFasterUpdates()
+    self.fasterUpdates = false
     self.Frame:SetScript("OnUpdate", function(_, delta)
         self.Frame.elapsed = (self.Frame.elapsed or 0) + delta
         if self.Frame.elapsed >= 0.25 then
@@ -241,7 +244,7 @@ function BarMixin:UpdateDisplay(layoutName, force)
         return
     end
 
-    local max, current, displayValue, valueType, precision = self:GetResourceValue(resource)
+    local max, maxDisplayValue, current, displayValue, valueType = self:GetResourceValue(resource)
     if not max then
         if not LEM:IsInEditMode() then
             self:Hide()
@@ -249,17 +252,29 @@ function BarMixin:UpdateDisplay(layoutName, force)
         return
     end
 
-    self.StatusBar:SetMinMaxValues(0, max)
-    self.StatusBar:SetValue(current)
+    self.StatusBar:SetMinMaxValues(0, max, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+    self.StatusBar:SetValue(current, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
 
-    if valueType == "percent" then
-        self.TextValue:SetText(string.format("%.0f%%", displayValue))
-    elseif valueType == "timer" then
-        self.TextValue:SetText(string.format("%." .. (precision or 1) .. "f", displayValue))
-    elseif valueType == "custom" then
-        self.TextValue:SetText(displayValue)
-    else -- Default to number
-        self.TextValue:SetText(AbbreviateNumbers(displayValue))
+    if data.textFormat == nil or data.textFormat == "Current" then
+        if valueType == "custom" then
+            self.TextValue:SetText(displayValue)
+        else
+            self.TextValue:SetText(AbbreviateNumbers(displayValue))
+        end
+    elseif data.textFormat == "Current / Maximum" then
+        if valueType == "custom" then
+            self.TextValue:SetText(displayValue .. ' / ' .. maxDisplayValue)
+        else
+            self.TextValue:SetText(AbbreviateNumbers(displayValue) .. ' / ' .. AbbreviateNumbers(maxDisplayValue))
+        end
+    elseif data.textFormat == "Percent" or data.textFormat == "Percent%" then
+        local precision = data.textPrecision and math.max(0, string.len(data.textPrecision) - 3) or 0
+
+        if valueType == "custom" then
+            self.TextValue:SetText(displayValue)
+        else
+            self.TextValue:SetText(string.format("%." .. (precision or 0) .. "f" .. (data.textFormat == "Percent%" and "%%" or ""), displayValue))
+        end
     end
 
     if addonTable.fragmentedPowerTypes[resource] then
@@ -297,10 +312,22 @@ function BarMixin:ApplyVisibilitySettings(layoutName, inCombat)
     end
 
     local spec = C_SpecializationInfo.GetSpecialization()
+    local specID = C_SpecializationInfo.GetSpecializationInfo(spec)
     local role = select(5, C_SpecializationInfo.GetSpecializationInfo(spec))
 
-    if resource == Enum.PowerType.Mana and role == "DAMAGER" and data.hideManaOnDps == true then
-        self:Hide();
+    if resource == "HEALTH" and data.hideHealthOnRole and data.hideHealthOnRole[role] then
+        self:Hide()
+        return
+    end
+
+    -- Not on arcane mage!
+    if resource == Enum.PowerType.Mana and data.hideManaOnRole and data.hideManaOnRole[role] and specID ~= 62 then
+        self:Hide()
+        return
+    end
+
+    if data.hideWhileMountedOrVehicule and (IsMounted() or UnitInVehicle("player")) then
+        self:Hide()
         return
     end
 
@@ -439,10 +466,10 @@ function BarMixin:ApplyLayout(layoutName, force)
 
     self:UpdateTicksLayout(layoutName)
 
-    if data.smoothProgress then
-        self:EnableSmoothProgress()
+    if data.fasterUpdates then
+        self:EnableFasterUpdates()
     else
-        self:DisableSmoothProgress()
+        self:DisableFasterUpdates()
     end
 
     local resource = self:GetResource()
@@ -670,7 +697,7 @@ function BarMixin:ApplyForegroundSettings(layoutName)
 
     local fgStyleName = data.foregroundStyle or defaults.foregroundStyle
     local fgTexture = LSM:Fetch(LSM.MediaType.STATUSBAR, fgStyleName)
-    
+
     local resource = self:GetResource()
     local color = self:GetBarColor(resource)
     if data.useResourceAtlas == true and (color.atlasElementName or color.atlas) then
@@ -684,7 +711,7 @@ function BarMixin:ApplyForegroundSettings(layoutName)
             fgTexture = color.atlas
         end
     end
-    
+
     if fgTexture then
         self.StatusBar:SetStatusBarTexture(fgTexture)
 
@@ -813,7 +840,91 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
     local r, g, b = self.StatusBar:GetStatusBarColor()
     local color = { r = r, g = g, b = b }
 
-    if resource == Enum.PowerType.Runes then
+    if resource == Enum.PowerType.Essence then
+        local current = UnitPower("player", resource)
+        local maxEssence = UnitPowerMax("player", resource)
+        local regenRate = GetPowerRegenForPowerType(resource) or 0.2
+        local tickDuration = 5 / (5 / (1 / regenRate))
+        local now = GetTime()
+
+        self._NextEssenceTick = self._NextEssenceTick or nil
+        self._LastEssence = self._LastEssence or current
+
+        -- If we gained an essence, reset timer
+        if current > self._LastEssence then
+            if current < maxEssence then
+                self._NextEssenceTick = now + tickDuration
+            else
+                self._NextEssenceTick = nil
+            end
+        end
+
+        -- If missing essence and no timer, start it
+        if current < maxEssence and not self._NextEssenceTick then
+            self._NextEssenceTick = now + tickDuration
+        end
+
+        -- If full essence, hide timer
+        if current >= maxEssence then
+            self._NextEssenceTick = nil
+        end
+
+        self._LastEssence = current
+
+        local displayOrder = {}
+        local stateList = {}
+        for i = 1, maxEssence do
+            if i <= current then
+                stateList[i] = "full"
+            elseif i == current + 1 then
+                stateList[i] = self._NextEssenceTick and "partial" or "empty"
+            else
+                stateList[i] = "empty"
+            end
+            table.insert(displayOrder, i)
+        end
+
+        local precision = data.fragmentedPowerBarTextPrecision and math.max(0, string.len(data.fragmentedPowerBarTextPrecision) - 3) or 0
+        for pos = 1, #displayOrder do
+            local idx = displayOrder[pos]
+            local essFrame = self.FragmentedPowerBars[idx]
+            local essText  = self.FragmentedPowerBarTexts[idx]
+            local state = stateList[idx]
+
+            if essFrame then
+                essFrame:ClearAllPoints()
+                if self.StatusBar:GetOrientation() == "VERTICAL" then
+                    essFrame:SetSize(barWidth, fragmentedBarHeight)
+                    essFrame:SetPoint("BOTTOM", self.Frame, "BOTTOM", 0, (pos - 1) * fragmentedBarHeight)
+                else
+                    essFrame:SetSize(fragmentedBarWidth, barHeight)
+                    essFrame:SetPoint("LEFT", self.Frame, "LEFT", (pos - 1) * fragmentedBarWidth, 0)
+                end
+
+                essFrame:SetMinMaxValues(0, 1)
+
+                if state == "full" then
+                    essFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    essFrame:SetStatusBarColor(color.r, color.g, color.b)
+                    essText:SetText("")
+                elseif state == "partial" then
+                    local remaining = math.max(0, self._NextEssenceTick - now)
+                    local value = 1 - (remaining / tickDuration)
+                    essFrame:SetValue(value, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    essFrame:SetStatusBarColor(color.r, color.g, color.b)
+                    essText:SetText(string.format("%." .. (precision or 1) .. "f", remaining))
+                else
+                    essFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                    essFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5)
+                    essText:SetText("")
+                end
+
+                essFrame:Show()
+            end
+        end
+
+        self:ApplyFontSettings(layoutName)
+    elseif resource == Enum.PowerType.Runes then
         -- Collect rune states: ready and recharging
         local readyList = {}
         local cdList = {}
@@ -858,6 +969,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
             end
         end
 
+        local precision = data.fragmentedPowerBarTextPrecision and math.max(0, string.len(data.fragmentedPowerBarTextPrecision) - 3) or 0
         for pos = 1, #displayOrder do
             local runeIndex = displayOrder[pos]
             local runeFrame = self.FragmentedPowerBars[runeIndex]
@@ -876,17 +988,17 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
 
                 runeFrame:SetMinMaxValues(0, 1)
                 if readyLookup[runeIndex] then
-                    runeFrame:SetValue(1)
+                    runeFrame:SetValue(1, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                     runeText:SetText("")
                     runeFrame:SetStatusBarColor(color.r, color.g, color.b)
                 else
                     local cdInfo = cdLookup[runeIndex]
                     runeFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5)
                     if cdInfo then
-                        runeFrame:SetValue(cdInfo.frac)
-                        runeText:SetText(string.format("%.1f", math.max(0, cdInfo.remaining)))
+                        runeFrame:SetValue(cdInfo.frac, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
+                        runeText:SetText(string.format("%." .. (precision or 1) .. "f", math.max(0, cdInfo.remaining)))
                     else
-                        runeFrame:SetValue(0)
+                        runeFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
                         runeText:SetText("")
                     end
                 end
@@ -895,14 +1007,13 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
             end
         end
         self:ApplyFontSettings(layoutName)
+    end
 
-        -- Hide any extra rune frames beyond current maxPower
-        for i = maxPower + 1, #self.FragmentedPowerBars do
-            if self.FragmentedPowerBars[i] then
-                self.FragmentedPowerBars[i]:Hide()
-                if self.FragmentedPowerBarTexts[i] then
-                    self.FragmentedPowerBarTexts[i]:SetText("")
-                end
+    for i = maxPower + 1, #self.FragmentedPowerBars do
+        if self.FragmentedPowerBars[i] then
+            self.FragmentedPowerBars[i]:Hide()
+            if self.FragmentedPowerBarTexts[i] then
+                self.FragmentedPowerBarTexts[i]:SetText("")
             end
         end
     end
