@@ -768,7 +768,7 @@ function LEMSettingsLoaderMixin:LoadSettings()
 
     local buttonSettings = {
         {
-            text = "Color Settings",
+            text = "Power Color Settings",
             click = function() -- Cannot directly close Edit Mode because it is protected
                 if not addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit then
                     addonTable.prettyPrint('Settings will open after leaving Edit Mode')
@@ -781,7 +781,7 @@ function LEMSettingsLoaderMixin:LoadSettings()
                     EditModeManagerFrame:HookScript("OnHide", function()
                         if addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit == true then
                             C_Timer.After(0.1, function ()
-                                Settings.OpenToCategory(addonTable.settingsCategory:GetID())
+                                Settings.OpenToCategory(addonTable.rootSettingsCategory:GetID())
                             end)
                             addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit = false
                         end

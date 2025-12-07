@@ -4,6 +4,9 @@ addonTable.LSM = LibStub("LibSharedMedia-3.0")
 local LSM = addonTable.LSM
 
 addonTable.LEM = LibStub("LibEQOLEditMode-1.0")
+addonTable.SettingsLib = LibStub("LibEQOLSettingsMode-1.0")
+addonTable.LibSerialize = LibStub("LibSerialize")
+addonTable.LibDeflate = LibStub("LibDeflate")
 
 ------------------------------------------------------------
 -- LIBSHAREDMEDIA INTEGRATION
