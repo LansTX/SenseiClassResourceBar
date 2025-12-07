@@ -185,6 +185,7 @@ addonTable.RegistereredBar.SecondaryResourceBar = {
         hideBlizzardSecondaryResourceUi = false,
         hideManaOnRole = {},
         showTicks = true,
+        tickColor = {r = 0, g = 0, b = 0, a = 1},
         tickThickness = 1,
         useResourceAtlas = false,
     },
@@ -232,26 +233,41 @@ addonTable.RegistereredBar.SecondaryResourceBar = {
             {
                 parentId = "Bar Settings",
                 order = 304,
+                kind = LEM.SettingType.Divider,
+            },
+            {
+                parentId = "Bar Settings",
+                order = 305,
                 name = "Show Ticks When Available",
-                kind = LEM.SettingType.Checkbox,
+                kind = LEM.SettingType.CheckboxColor,
                 default = defaults.showTicks,
+                colorDefault = defaults.tickColor,
                 get = function(layoutName)
-                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    local data = SenseiClassResourceBarDB[dbName][layoutName] or CopyTa
                     if data and data.showTicks ~= nil then
                         return data.showTicks
                     else
                         return defaults.showTicks
                     end
                 end,
+                colorGet = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    return data and data.tickColor or defaults.tickColor
+                end,
                 set = function(layoutName, value)
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
                     SenseiClassResourceBarDB[dbName][layoutName].showTicks = value
                     bar:UpdateTicksLayout(layoutName)
                 end,
+                colorSet = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].tickColor = value
+                    bar:UpdateTicksLayout(layoutName)
+                end,
             },
             {
                 parentId = "Bar Settings",
-                order = 305,
+                order = 306,
                 name = "Tick Thickness",
                 kind = LEM.SettingType.Slider,
                 default = defaults.tickThickness,

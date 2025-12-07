@@ -755,15 +755,16 @@ function BarMixin:UpdateTicksLayout(layoutName)
     if width <= 0 or height <= 0 then return end
 
     local tickThickness = data.tickThickness or defaults.tickThickness or 1
+    local tickColor = data.tickColor or defaults.tickColor
 
     local needed = max - 1
     for i = 1, needed do
         local t = self.Ticks[i]
         if not t then
             t = self.Frame:CreateTexture(nil, "OVERLAY")
-            t:SetColorTexture(0, 0, 0, 1)
             self.Ticks[i] = t
         end
+        t:SetColorTexture(tickColor.r or 0, tickColor.g or 0, tickColor.b or 0, tickColor.a or 1)
         t:ClearAllPoints()
         if self.StatusBar:GetOrientation() == "VERTICAL" then
             local y = (i / max) * height
