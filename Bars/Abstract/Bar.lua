@@ -976,7 +976,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
                     local remaining = math.max(0, self._NextEssenceTick - now)
                     local value = 1 - (remaining / tickDuration)
                     essFrame:SetValue(value, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
-                    essFrame:SetStatusBarColor(color.r, color.g, color.b, color.a or 1)
+                    essFrame:SetStatusBarColor(color.r * 0.5, color.g * 0.5, color.b * 0.5, color.a or 1)
                     essText:SetText(string.format("%." .. (precision or 1) .. "f", remaining))
                 else
                     essFrame:SetValue(0, data.smoothProgress and buildVersion >= 120000 and Enum.StatusBarInterpolation.ExponentialEaseOut or nil)
