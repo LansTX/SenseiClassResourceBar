@@ -112,6 +112,10 @@ local PowerData = {
         key = "SOUL_FRAGMENTS_VOID_META",
     },
     {
+        label = "Essence",
+        key = Enum.PowerType.Essence,
+    },
+    {
         label = "Ebon Might",
         key = "EBON_MIGHT",
     },
