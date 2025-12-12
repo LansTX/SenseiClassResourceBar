@@ -146,6 +146,8 @@ addonTable.SettingsPanelInitializers[featureId] = function(category)
         colorizeLabel = true,
     })
 
+	SettingsLib:CreateHeader(category, "Health Color")
+
     SettingsLib:CreateColorOverrides(category, {
         entries = HealthData,
         getColor = function(key)
