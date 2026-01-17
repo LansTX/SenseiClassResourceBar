@@ -76,8 +76,10 @@ function addonTable:GetResourceColor(resource)
         color = staggerColors[resource]
         settingKey = resource
     elseif resource == "SOUL_FRAGMENTS" or resource == "SOUL_FRAGMENTS_VOID_META" then
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(1217607) -- Void Meta
+
         -- Different color during Void Metamorphosis
-        if resource == "SOUL_FRAGMENTS_VOID_META" or (DemonHunterSoulFragmentsBar and DemonHunterSoulFragmentsBar.CollapsingStarBackground:IsShown()) then
+        if resource == "SOUL_FRAGMENTS_VOID_META" or auraData ~= nil then
             settingKey = "SOUL_FRAGMENTS_VOID_META"
             color = { r = 0.037, g = 0.220, b = 0.566, atlas = "UF-DDH-CollapsingStar-Bar-Ready" }
         else

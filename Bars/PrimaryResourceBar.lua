@@ -68,7 +68,7 @@ function PrimaryResourceBarMixin:GetResourceValue(resource)
     if not data then return nil, nil, nil, nil, nil end
 
     if resource == "MAELSTROM_WEAPON" then
-        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179) -- Maelstrom Weapon
         local current = auraData and auraData.applications or 0
         local max = 10
 

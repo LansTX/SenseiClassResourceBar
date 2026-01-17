@@ -135,6 +135,7 @@ addonTable.RegistereredBar.HealthBar = {
                     SenseiClassResourceBarDB[dbName][layoutName].hideBlizzardPlayerContainerUi = value
                     bar:HideBlizzardPlayerContainer(layoutName)
                 end,
+                tooltip = "Hides the default Blizzard Player Frame UI",
             },
             {
                 parentId = "Bar Style",

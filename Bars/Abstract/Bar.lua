@@ -1101,7 +1101,7 @@ function BarMixin:UpdateFragmentedPowerDisplay(layoutName)
             end
         end
     elseif resource == "MAELSTROM_WEAPON" then
-        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179)
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(344179) -- Maelstrom Weapon
         local current = auraData and auraData.applications or 0
         local above5MwColor = addonTable:GetOverrideResourceColor("MAELSTROM_WEAPON_ABOVE_5") or color
 
