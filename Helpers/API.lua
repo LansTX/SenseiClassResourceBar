@@ -216,6 +216,8 @@ addonTable.clamp = function(x, min, max)
 end
 
 addonTable.rounded = function(num, idp)
+    if not num then return num end
+
     local mult = 10^(idp or 0)
     return math.floor(num * mult + 0.5) / mult
 end

@@ -152,26 +152,6 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
                 end,
                 tooltip = "Force the Percent format on Mana",
             },
-            {
-                parentId = "Bar Style",
-                order = 606,
-                name = "Use Resource Foreground And Color",
-                kind = LEM.SettingType.Checkbox,
-                default = defaults.useResourceAtlas,
-                get = function(layoutName)
-                    local data = SenseiClassResourceBarDB[dbName][layoutName]
-                    if data and data.useResourceAtlas ~= nil then
-                        return data.useResourceAtlas
-                    else
-                        return defaults.useResourceAtlas
-                    end
-                end,
-                set = function(layoutName, value)
-                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
-                    SenseiClassResourceBarDB[dbName][layoutName].useResourceAtlas = value
-                    bar:ApplyLayout(layoutName)
-                end,
-            },
         }
     end,
 }

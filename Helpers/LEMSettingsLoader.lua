@@ -398,7 +398,7 @@ local function BuildLemSettings(bar, defaults)
         {
             parentId = "Text Settings",
             order = 402,
-            name = "Text Format",
+            name = "Format",
             kind = LEM.SettingType.Dropdown,
             default = defaults.textFormat,
             useOldStyle = true,
@@ -419,7 +419,7 @@ local function BuildLemSettings(bar, defaults)
         {
             parentId = "Text Settings",
             order = 403,
-            name = "Text Precision",
+            name = "Precision",
             kind = LEM.SettingType.Dropdown,
             default = defaults.textPrecision,
             useOldStyle = true,
@@ -440,7 +440,7 @@ local function BuildLemSettings(bar, defaults)
         {
             parentId = "Text Settings",
             order = 404,
-            name = "Text Alignment",
+            name = "Alignment",
             kind = LEM.SettingType.Dropdown,
             default = defaults.textAlign,
             useOldStyle = true,
@@ -468,7 +468,7 @@ local function BuildLemSettings(bar, defaults)
         {
             parentId = "Font",
             order = 501,
-            name = "Font Face",
+            name = "Font",
             kind = LEM.SettingType.Dropdown,
             default = defaults.font,
             useOldStyle = true,
@@ -538,7 +538,7 @@ local function BuildLemSettings(bar, defaults)
         {
             parentId = "Font",
             order = 502,
-            name = "Font Size",
+            name = "Size",
             kind = LEM.SettingType.Slider,
             default = defaults.fontSize,
             minValue = 5,
@@ -557,7 +557,7 @@ local function BuildLemSettings(bar, defaults)
         {
             parentId = "Font",
             order = 503,
-            name = "Font Outline",
+            name = "Outline",
             kind = LEM.SettingType.Dropdown,
             default = defaults.fontOutline,
             useOldStyle = true,
@@ -582,30 +582,24 @@ local function BuildLemSettings(bar, defaults)
             parentId = "Bar Style",
             order = 601,
             name = "Border",
-            kind = LEM.SettingType.Dropdown,
+            kind = LEM.SettingType.DropdownColor,
             default = defaults.maskAndBorderStyle,
+            colorDefault = defaults.borderColor,
             useOldStyle = true,
             values = addonTable.availableMaskAndBorderStyles,
             get = function(layoutName)
                 return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].maskAndBorderStyle) or defaults.maskAndBorderStyle
+            end,
+            colorGet = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                return data and data.borderColor or defaults.borderColor
             end,
             set = function(layoutName, value)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].maskAndBorderStyle = value
                 bar:ApplyMaskAndBorderSettings(layoutName)
             end,
-        },
-        {
-            parentId = "Bar Style",
-            order = 603,
-            name = "Border Color",
-            kind = LEM.SettingType.Color,
-            default = defaults.borderColor,
-            get = function(layoutName)
-                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                return data and data.borderColor or defaults.borderColor
-            end,
-            set = function(layoutName, value)
+            colorSet = function(layoutName, value)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].borderColor = value
                 bar:ApplyMaskAndBorderSettings(layoutName)
@@ -613,10 +607,11 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             parentId = "Bar Style",
-            order = 604,
+            order = 602,
             name = "Background",
-            kind = LEM.SettingType.Dropdown,
+            kind = LEM.SettingType.DropdownColor,
             default = defaults.backgroundStyle,
+            colorDefault = defaults.backgroundColor,
             useOldStyle = true,
             height = 200,
             generator = function(dropdown, rootDescription, settingObject)
@@ -672,23 +667,16 @@ local function BuildLemSettings(bar, defaults)
             get = function(layoutName)
                 return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].backgroundStyle) or defaults.backgroundStyle
             end,
+            colorGet = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                return data and data.backgroundColor or defaults.backgroundColor
+            end,
             set = function(layoutName, value)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].backgroundStyle = value
                 bar:ApplyLayout(layoutName)
             end,
-        },
-        {
-            parentId = "Bar Style",
-            order = 605,
-            name = "Background Color",
-            kind = LEM.SettingType.Color,
-            default = defaults.backgroundColor,
-            get = function(layoutName)
-                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                return data and data.backgroundColor or defaults.backgroundColor
-            end,
-            set = function(layoutName, value)
+            colorSet = function(layoutName, value)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].backgroundColor = value
                 bar:ApplyBackgroundSettings(layoutName)
@@ -696,8 +684,28 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             parentId = "Bar Style",
-            order = 607,
-            name = "Foreground",
+            order = 603,
+            name = "Use Resource Texture And Color",
+            kind = LEM.SettingType.Checkbox,
+            default = defaults.useResourceAtlas,
+            get = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                if data and data.useResourceAtlas ~= nil then
+                    return data.useResourceAtlas
+                else
+                    return defaults.useResourceAtlas
+                end
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].useResourceAtlas = value
+                bar:ApplyLayout(layoutName)
+            end,
+        },
+        {
+            parentId = "Bar Style",
+            order = 605,
+            name = "Bar Texture",
             kind = LEM.SettingType.Dropdown,
             default = defaults.foregroundStyle,
             useOldStyle = true,
