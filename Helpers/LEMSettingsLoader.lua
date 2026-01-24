@@ -359,6 +359,208 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
+            order = 400,
+            name = "Bar Style",
+            kind = LEM.SettingType.Collapsible,
+            id = "Bar Style",
+            defaultCollapsed = true,
+        },
+        {
+            parentId = "Bar Style",
+            order = 405,
+            name = "Border",
+            kind = LEM.SettingType.DropdownColor,
+            default = defaults.maskAndBorderStyle,
+            colorDefault = defaults.borderColor,
+            useOldStyle = true,
+            values = addonTable.availableMaskAndBorderStyles,
+            get = function(layoutName)
+                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].maskAndBorderStyle) or defaults.maskAndBorderStyle
+            end,
+            colorGet = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                return data and data.borderColor or defaults.borderColor
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].maskAndBorderStyle = value
+                bar:ApplyMaskAndBorderSettings(layoutName)
+            end,
+            colorSet = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].borderColor = value
+                bar:ApplyMaskAndBorderSettings(layoutName)
+            end,
+        },
+        {
+            parentId = "Bar Style",
+            order = 403,
+            name = "Background",
+            kind = LEM.SettingType.DropdownColor,
+            default = defaults.backgroundStyle,
+            colorDefault = defaults.backgroundColor,
+            useOldStyle = true,
+            height = 200,
+            generator = function(dropdown, rootDescription, settingObject)
+                dropdown.texturePool = {}
+
+                local layoutName = LEM.GetActiveLayoutName() or "Default"
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                if not data then return end
+
+                if not dropdown._SCRB_Background_Dropdown_OnMenuClosed_hooked then
+                    hooksecurefunc(dropdown, "OnMenuClosed", function() 
+                        for _, texture in pairs(dropdown.texturePool) do
+                            texture:Hide()
+                        end
+                    end)
+                    dropdown._SCRB_Background_Dropdown_OnMenuClosed_hooked = true
+                end
+
+                dropdown:SetDefaultText(settingObject.get(layoutName))
+
+                local textures = LSM:HashTable(LSM.MediaType.BACKGROUND)
+                local sortedTextures = CopyTable(addonTable.availableBackgroundStyles)
+                for textureName in pairs(textures) do
+                    table.insert(sortedTextures, textureName)
+                end
+                table.sort(sortedTextures)
+
+                for index, textureName in ipairs(sortedTextures) do
+                    local texturePath = textures[textureName]
+
+                    local button = rootDescription:CreateButton(textureName, function()
+                        dropdown:SetDefaultText(textureName)
+                        settingObject.set(layoutName, textureName)
+                    end)
+
+                    if texturePath then
+                        button:AddInitializer(function(self)
+                            local textureBackground = dropdown.texturePool[index]
+                            if not textureBackground then
+                                textureBackground = dropdown:CreateTexture(nil, "BACKGROUND")
+                                dropdown.texturePool[index] = textureBackground
+                            end
+
+                            textureBackground:SetParent(self)
+                            textureBackground:SetAllPoints(self)
+                            textureBackground:SetTexture(texturePath)
+
+                            textureBackground:Show()
+                        end)
+                    end
+                end
+            end,
+            get = function(layoutName)
+                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].backgroundStyle) or defaults.backgroundStyle
+            end,
+            colorGet = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                return data and data.backgroundColor or defaults.backgroundColor
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].backgroundStyle = value
+                bar:ApplyLayout(layoutName)
+            end,
+            colorSet = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].backgroundColor = value
+                bar:ApplyBackgroundSettings(layoutName)
+            end,
+        },
+        {
+            parentId = "Bar Style",
+            order = 404,
+            name = "Use Bar Color For Background Color",
+            kind = LEM.SettingType.Checkbox,
+            default = defaults.useStatusBarColorForBackgroundColor,
+            get = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                if data and data.useStatusBarColorForBackgroundColor ~= nil then
+                    return data.useStatusBarColorForBackgroundColor
+                else
+                    return defaults.useStatusBarColorForBackgroundColor
+                end
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].useStatusBarColorForBackgroundColor = value
+                bar:ApplyBackgroundSettings(layoutName)
+            end,
+        },
+        {
+            parentId = "Bar Style",
+            order = 402,
+            name = "Bar Texture",
+            kind = LEM.SettingType.Dropdown,
+            default = defaults.foregroundStyle,
+            useOldStyle = true,
+            height = 200,
+            generator = function(dropdown, rootDescription, settingObject)
+                dropdown.texturePool = {}
+
+                local layoutName = LEM.GetActiveLayoutName() or "Default"
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                if not data then return end
+
+                if not dropdown._SCRB_Foreground_Dropdown_OnMenuClosed_hooked then
+                    hooksecurefunc(dropdown, "OnMenuClosed", function() 
+                        for _, texture in pairs(dropdown.texturePool) do
+                            texture:Hide()
+                        end
+                    end)
+                    dropdown._SCRB_Foreground_Dropdown_OnMenuClosed_hooked = true
+                end
+
+                dropdown:SetDefaultText(settingObject.get(layoutName))
+
+                local textures = LSM:HashTable(LSM.MediaType.STATUSBAR)
+                local sortedTextures = {}
+                for textureName in pairs(textures) do
+                    table.insert(sortedTextures, textureName)
+                end
+                table.sort(sortedTextures)
+
+                for index, textureName in ipairs(sortedTextures) do
+                    local texturePath = textures[textureName]
+
+                    local button = rootDescription:CreateButton(textureName, function()
+                        dropdown:SetDefaultText(textureName)
+                        settingObject.set(layoutName, textureName)
+                    end)
+
+                    if texturePath then
+                        button:AddInitializer(function(self)
+                            local textureStatusBar = dropdown.texturePool[index]
+                            if not textureStatusBar then
+                                textureStatusBar = dropdown:CreateTexture(nil, "BACKGROUND")
+                                dropdown.texturePool[index] = textureStatusBar
+                            end
+
+                            textureStatusBar:SetParent(self)
+                            textureStatusBar:SetAllPoints(self)
+                            textureStatusBar:SetTexture(texturePath)
+
+                            textureStatusBar:Show()
+                        end)
+                    end
+                end
+            end,
+            get = function(layoutName)
+                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].foregroundStyle) or defaults.foregroundStyle
+            end,
+            set = function(layoutName, value)
+                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
+                SenseiClassResourceBarDB[config.dbName][layoutName].foregroundStyle = value
+                bar:ApplyLayout(layoutName)
+            end,
+            isEnabled = function(layoutName)
+                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
+                return not data.useResourceAtlas
+            end,
+        },
+        {
             order = 500,
             name = "Text Settings",
             kind = LEM.SettingType.Collapsible,
@@ -569,208 +771,6 @@ local function BuildLemSettings(bar, defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].fontOutline = value
                 bar:ApplyFontSettings(layoutName)
-            end,
-        },
-        {
-            order = 400,
-            name = "Bar Style",
-            kind = LEM.SettingType.Collapsible,
-            id = "Bar Style",
-            defaultCollapsed = true,
-        },
-        {
-            parentId = "Bar Style",
-            order = 401,
-            name = "Border",
-            kind = LEM.SettingType.DropdownColor,
-            default = defaults.maskAndBorderStyle,
-            colorDefault = defaults.borderColor,
-            useOldStyle = true,
-            values = addonTable.availableMaskAndBorderStyles,
-            get = function(layoutName)
-                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].maskAndBorderStyle) or defaults.maskAndBorderStyle
-            end,
-            colorGet = function(layoutName)
-                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                return data and data.borderColor or defaults.borderColor
-            end,
-            set = function(layoutName, value)
-                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
-                SenseiClassResourceBarDB[config.dbName][layoutName].maskAndBorderStyle = value
-                bar:ApplyMaskAndBorderSettings(layoutName)
-            end,
-            colorSet = function(layoutName, value)
-                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
-                SenseiClassResourceBarDB[config.dbName][layoutName].borderColor = value
-                bar:ApplyMaskAndBorderSettings(layoutName)
-            end,
-        },
-        {
-            parentId = "Bar Style",
-            order = 402,
-            name = "Background",
-            kind = LEM.SettingType.DropdownColor,
-            default = defaults.backgroundStyle,
-            colorDefault = defaults.backgroundColor,
-            useOldStyle = true,
-            height = 200,
-            generator = function(dropdown, rootDescription, settingObject)
-                dropdown.texturePool = {}
-
-                local layoutName = LEM.GetActiveLayoutName() or "Default"
-                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                if not data then return end
-
-                if not dropdown._SCRB_Background_Dropdown_OnMenuClosed_hooked then
-                    hooksecurefunc(dropdown, "OnMenuClosed", function() 
-                        for _, texture in pairs(dropdown.texturePool) do
-                            texture:Hide()
-                        end
-                    end)
-                    dropdown._SCRB_Background_Dropdown_OnMenuClosed_hooked = true
-                end
-
-                dropdown:SetDefaultText(settingObject.get(layoutName))
-
-                local textures = LSM:HashTable(LSM.MediaType.BACKGROUND)
-                local sortedTextures = CopyTable(addonTable.availableBackgroundStyles)
-                for textureName in pairs(textures) do
-                    table.insert(sortedTextures, textureName)
-                end
-                table.sort(sortedTextures)
-
-                for index, textureName in ipairs(sortedTextures) do
-                    local texturePath = textures[textureName]
-
-                    local button = rootDescription:CreateButton(textureName, function()
-                        dropdown:SetDefaultText(textureName)
-                        settingObject.set(layoutName, textureName)
-                    end)
-
-                    if texturePath then
-                        button:AddInitializer(function(self)
-                            local textureBackground = dropdown.texturePool[index]
-                            if not textureBackground then
-                                textureBackground = dropdown:CreateTexture(nil, "BACKGROUND")
-                                dropdown.texturePool[index] = textureBackground
-                            end
-
-                            textureBackground:SetParent(self)
-                            textureBackground:SetAllPoints(self)
-                            textureBackground:SetTexture(texturePath)
-
-                            textureBackground:Show()
-                        end)
-                    end
-                end
-            end,
-            get = function(layoutName)
-                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].backgroundStyle) or defaults.backgroundStyle
-            end,
-            colorGet = function(layoutName)
-                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                return data and data.backgroundColor or defaults.backgroundColor
-            end,
-            set = function(layoutName, value)
-                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
-                SenseiClassResourceBarDB[config.dbName][layoutName].backgroundStyle = value
-                bar:ApplyLayout(layoutName)
-            end,
-            colorSet = function(layoutName, value)
-                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
-                SenseiClassResourceBarDB[config.dbName][layoutName].backgroundColor = value
-                bar:ApplyBackgroundSettings(layoutName)
-            end,
-        },
-        {
-            parentId = "Bar Style",
-            order = 403,
-            name = "Use Resource Texture And Color",
-            kind = LEM.SettingType.Checkbox,
-            default = defaults.useResourceAtlas,
-            get = function(layoutName)
-                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                if data and data.useResourceAtlas ~= nil then
-                    return data.useResourceAtlas
-                else
-                    return defaults.useResourceAtlas
-                end
-            end,
-            set = function(layoutName, value)
-                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
-                SenseiClassResourceBarDB[config.dbName][layoutName].useResourceAtlas = value
-                bar:ApplyLayout(layoutName)
-            end,
-        },
-        {
-            parentId = "Bar Style",
-            order = 405,
-            name = "Bar Texture",
-            kind = LEM.SettingType.Dropdown,
-            default = defaults.foregroundStyle,
-            useOldStyle = true,
-            height = 200,
-            generator = function(dropdown, rootDescription, settingObject)
-                dropdown.texturePool = {}
-
-                local layoutName = LEM.GetActiveLayoutName() or "Default"
-                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                if not data then return end
-
-                if not dropdown._SCRB_Foreground_Dropdown_OnMenuClosed_hooked then
-                    hooksecurefunc(dropdown, "OnMenuClosed", function() 
-                        for _, texture in pairs(dropdown.texturePool) do
-                            texture:Hide()
-                        end
-                    end)
-                    dropdown._SCRB_Foreground_Dropdown_OnMenuClosed_hooked = true
-                end
-
-                dropdown:SetDefaultText(settingObject.get(layoutName))
-
-                local textures = LSM:HashTable(LSM.MediaType.STATUSBAR)
-                local sortedTextures = {}
-                for textureName in pairs(textures) do
-                    table.insert(sortedTextures, textureName)
-                end
-                table.sort(sortedTextures)
-
-                for index, textureName in ipairs(sortedTextures) do
-                    local texturePath = textures[textureName]
-
-                    local button = rootDescription:CreateButton(textureName, function()
-                        dropdown:SetDefaultText(textureName)
-                        settingObject.set(layoutName, textureName)
-                    end)
-
-                    if texturePath then
-                        button:AddInitializer(function(self)
-                            local textureStatusBar = dropdown.texturePool[index]
-                            if not textureStatusBar then
-                                textureStatusBar = dropdown:CreateTexture(nil, "BACKGROUND")
-                                dropdown.texturePool[index] = textureStatusBar
-                            end
-
-                            textureStatusBar:SetParent(self)
-                            textureStatusBar:SetAllPoints(self)
-                            textureStatusBar:SetTexture(texturePath)
-
-                            textureStatusBar:Show()
-                        end)
-                    end
-                end
-            end,
-            get = function(layoutName)
-                return (SenseiClassResourceBarDB[config.dbName][layoutName] and SenseiClassResourceBarDB[config.dbName][layoutName].foregroundStyle) or defaults.foregroundStyle
-            end,
-            set = function(layoutName, value)
-                SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
-                SenseiClassResourceBarDB[config.dbName][layoutName].foregroundStyle = value
-                bar:ApplyLayout(layoutName)
-            end,
-            isEnabled = function(layoutName)
-                local data = SenseiClassResourceBarDB[config.dbName][layoutName]
-                return not data.useResourceAtlas
             end,
         },
     }

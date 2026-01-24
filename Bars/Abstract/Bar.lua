@@ -523,8 +523,8 @@ function BarMixin:ApplyLayout(layoutName, force)
     self:ApplyFontSettings(layoutName)
     self:ApplyFillDirectionSettings(layoutName)
     self:ApplyMaskAndBorderSettings(layoutName)
-    self:ApplyBackgroundSettings(layoutName)
     self:ApplyForegroundSettings(layoutName)
+    self:ApplyBackgroundSettings(layoutName)
 
     self:UpdateTicksLayout(layoutName)
 
@@ -758,6 +758,10 @@ function BarMixin:ApplyBackgroundSettings(layoutName)
     if not bgConfig then return end
 
     local bgColor = data.backgroundColor or defaults.backgroundColor
+    if data.useStatusBarColorForBackgroundColor then
+        local r, g, b, a = self.StatusBar:GetStatusBarColor()
+        bgColor = { r = r * 0.25, g = g * 0.25, b = b * 0.25, a = a or 1 }
+    end
 
     if bgConfig.type == "color" then
         -- Blend bgColor with bgConfig color based on how close bgColor is to white

@@ -128,6 +128,26 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
                 tooltip = "Not effective on Arcane Mage",
             },
             {
+                parentId = "Bar Style",
+                order = 401,
+                name = "Use Resource Texture And Color",
+                kind = LEM.SettingType.Checkbox,
+                default = defaults.useResourceAtlas,
+                get = function(layoutName)
+                    local data = SenseiClassResourceBarDB[dbName][layoutName]
+                    if data and data.useResourceAtlas ~= nil then
+                        return data.useResourceAtlas
+                    else
+                        return defaults.useResourceAtlas
+                    end
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].useResourceAtlas = value
+                    bar:ApplyLayout(layoutName)
+                end,
+            },
+            {
                 parentId = "Text Settings",
                 order = 505,
                 name = "Show Mana As Percent",

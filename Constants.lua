@@ -41,13 +41,15 @@ InitLSM()
 -- COMMON DEFAULTS & DROPDOWN OPTIONS
 ------------------------------------------------------------
 addonTable.commonDefaults = {
+    -- LEM settings
 	enableOverlayToggle = true,
     settingsMaxHeight = select(2, GetPhysicalScreenSize()) * 0.6,
-    point = "CENTER",
+    point = "CENTER", -- Shared
+    x = 0, -- Shared
+    y = 0, -- Shared
+    -- SCRB settings
     relativeFrame = "UIParent",
     relativePoint = "CENTER",
-    x = 0,
-    y = 0,
     barVisible = "Always Visible",
     hideWhileMountedOrVehicule = false,
     barStrata = "MEDIUM",
@@ -74,6 +76,7 @@ addonTable.commonDefaults = {
     borderColor = {r = 0, g = 0, b = 0, a = 1},
     backgroundStyle = "SCRB Semi-transparent",
     backgroundColor = {r = 1, g = 1, b = 1, a = 1},
+    useStatusBarColorForBackgroundColor = false,
     foregroundStyle = "SCRB FG Fade Left",
 }
 
