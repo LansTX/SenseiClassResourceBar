@@ -1,9 +1,11 @@
 local _, addonTable = ...
 
+local L = addonTable.L
+
 StaticPopupDialogs["SCRB_EXPORT_SETTINGS"] = StaticPopupDialogs["SCRB_EXPORT_SETTINGS"]
     or {
-        text = "Export",
-        button1 = CLOSE,
+        text = L["EXPORT"],
+        button1 = L["CLOSE"],
         hasEditBox = true,
         editBoxWidth = 320,
         timeout = 0,
@@ -14,9 +16,9 @@ StaticPopupDialogs["SCRB_EXPORT_SETTINGS"] = StaticPopupDialogs["SCRB_EXPORT_SET
 
 StaticPopupDialogs["SCRB_IMPORT_SETTINGS"] = StaticPopupDialogs["SCRB_IMPORT_SETTINGS"]
     or {
-        text = "Import",
-        button1 = OKAY,
-        button2 = CANCEL,
+        text = L["IMPORT"],
+        button1 = L["OKAY"],
+        button2 = L["CANCEL"],
         hasEditBox = true,
         editBoxWidth = 320,
         timeout = 0,

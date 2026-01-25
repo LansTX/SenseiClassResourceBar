@@ -1,6 +1,7 @@
 local _, addonTable = ...
 
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
+local L = addonTable.L
 
 local PrimaryResourceBarMixin = Mixin({}, addonTable.PowerBarMixin)
 
@@ -87,7 +88,7 @@ addonTable.RegisteredBar = addonTable.RegisteredBar or {}
 addonTable.RegisteredBar.PrimaryResourceBar = {
     mixin = addonTable.PrimaryResourceBarMixin,
     dbName = "PrimaryResourceBarDB",
-    editModeName = "Primary Resource Bar",
+    editModeName = L["PRIMARY_POWER_BAR_EDIT_MODE_NAME"],
     frameName = "PrimaryResourceBar",
     frameLevel = 3,
     defaultValues = {
@@ -106,9 +107,9 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
 
         return {
             {
-                parentId = "Bar Visibility",
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
                 order = 103,
-                name = "Hide Mana On Role",
+                name = L["HIDE_MANA_ON_ROLE"],
                 kind = LEM.SettingType.MultiDropdown,
                 default = defaults.hideManaOnRole,
                 values = addonTable.availableRoleOptions,
@@ -121,12 +122,12 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
                     SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
                     SenseiClassResourceBarDB[dbName][layoutName].hideManaOnRole = value
                 end,
-                tooltip = "Not effective on Arcane Mage",
+                tooltip = L["HIDE_MANA_ON_ROLE_PRIMARY_BAR_TOOLTIP"],
             },
             {
-                parentId = "Bar Style",
+                parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,
-                name = "Use Resource Texture And Color",
+                name = L["USE_RESOURCE_TEXTURE_AND_COLOR"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.useResourceAtlas,
                 get = function(layoutName)
@@ -144,9 +145,9 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
                 end,
             },
             {
-                parentId = "Text Settings",
+                parentId = L["CATEGORY_TEXT_SETTINGS"],
                 order = 505,
-                name = "Show Mana As Percent",
+                name = L["SHOW_MANA_AS_PERCENT"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.showManaAsPercent,
                 get = function(layoutName)
@@ -166,7 +167,7 @@ addonTable.RegisteredBar.PrimaryResourceBar = {
                     local data = SenseiClassResourceBarDB[dbName][layoutName]
                     return data.showText
                 end,
-                tooltip = "Force the Percent format on Mana",
+                tooltip = L["SHOW_MANA_AS_PERCENT_TOOLTIP"],
             },
         }
     end,

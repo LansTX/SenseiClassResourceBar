@@ -2,6 +2,7 @@ local _, addonTable = ...
 
 local LSM = addonTable.LSM or LibStub("LibSharedMedia-3.0")
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
+local L = addonTable.L
 
 ------------------------------------------------------------
 -- YOU SHOULD NOT USE DIRECTLY THIS MIXIN -- YOU NEED TO OVERWRITE SOME METHODS
@@ -403,7 +404,7 @@ function BarMixin:HideBlizzardPlayerContainer(layoutName)
     if data.hideBlizzardPlayerContainerUi == nil or InCombatLockdown() then return end
 
     if PlayerFrame then
-        if data.hideBlizzardPlayerContainerUi then
+        if data.hideBlizzardPlayerContainerUi == true then
             if LEM:IsInEditMode() then
                 PlayerFrame:Show()
             else 
@@ -436,7 +437,7 @@ function BarMixin:HideBlizzardSecondaryResource(layoutName)
 
     for class, f in pairs(blizzardResourceFrames) do
         if f and playerClass == class then
-            if data.hideBlizzardSecondaryResourceUi then
+            if data.hideBlizzardSecondaryResourceUi == true then
                 if LEM:IsInEditMode() then
                     if class ~= "DRUID" or (class == "DRUID" and GetShapeshiftFormID() == DRUID_CAT_FORM) then
                         f:Show()
@@ -478,8 +479,8 @@ function BarMixin:GetPoint(layoutName)
     if self.Frame == resolvedRelativeFrame or self.Frame == select(2, resolvedRelativeFrame:GetPoint(1)) then
         resolvedRelativeFrame = UIParent
         data.relativeFrame = "UIParent"
-        LEM.internal:RefreshSettingValues({"Relative Frame"})
-        addonTable.prettyPrint("Cannot change Relative Frame as the selected Frame is already relative to this Frame.")
+        LEM.internal:RefreshSettingValues({L["RELATIVE_FRAME"]})
+        addonTable.prettyPrint(L["RELATIVE_FRAME_CYLIC_WARNING"])
     end
 
     local uiWidth, uiHeight = UIParent:GetWidth() / 2, UIParent:GetHeight() / 2

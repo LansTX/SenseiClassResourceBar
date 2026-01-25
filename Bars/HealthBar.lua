@@ -1,6 +1,7 @@
 local _, addonTable = ...
 
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
+local L = addonTable.L
 
 local HealthBarMixin = Mixin({}, addonTable.BarMixin)
 
@@ -82,7 +83,7 @@ addonTable.RegisteredBar = addonTable.RegisteredBar or {}
 addonTable.RegisteredBar.HealthBar = {
     mixin = addonTable.HealthBarMixin,
     dbName = "healthBarDB",
-    editModeName = "Health Bar",
+    editModeName = L["HEALTH_BAR_EDIT_MODE_NAME"],
     frameName = "HealthBar",
     frameLevel = 0,
     defaultValues = {
@@ -99,9 +100,9 @@ addonTable.RegisteredBar.HealthBar = {
 
         return {
             {
-                parentId = "Bar Visibility",
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
                 order = 103,
-                name = "Hide On Role",
+                name = L["HIDE_HEALTH_ON_ROLE"],
                 kind = LEM.SettingType.MultiDropdown,
                 default = defaults.hideHealthOnRole,
                 values = addonTable.availableRoleOptions,
@@ -116,9 +117,9 @@ addonTable.RegisteredBar.HealthBar = {
                 end,
             },
             {
-                parentId = "Bar Visibility",
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
                 order = 105,
-                name = "Hide Blizzard UI",
+                name = L["HIDE_BLIZZARD_UI"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.hideBlizzardPlayerContainerUi,
                 get = function(layoutName)
@@ -134,12 +135,12 @@ addonTable.RegisteredBar.HealthBar = {
                     SenseiClassResourceBarDB[dbName][layoutName].hideBlizzardPlayerContainerUi = value
                     bar:HideBlizzardPlayerContainer(layoutName)
                 end,
-                tooltip = "Hides the default Blizzard Player Frame UI",
+                tooltip = L["HIDE_BLIZZARD_UI_HEALTH_BAR_TOOLTIP"],
             },
             {
-                parentId = "Bar Style",
+                parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,
-                name = "Use Class Color",
+                name = L["USE_CLASS_COLOR"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.useClassColor,
                 get = function(layoutName)

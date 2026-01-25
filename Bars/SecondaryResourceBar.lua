@@ -1,6 +1,7 @@
 local _, addonTable = ...
 
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
+local L = addonTable.L
 
 local SecondaryResourceBarMixin = Mixin({}, addonTable.PowerBarMixin)
 
@@ -197,7 +198,7 @@ addonTable.RegisteredBar = addonTable.RegisteredBar or {}
 addonTable.RegisteredBar.SecondaryResourceBar = {
     mixin = addonTable.SecondaryResourceBarMixin,
     dbName = "SecondaryResourceBarDB",
-    editModeName = "Secondary Resource Bar",
+    editModeName = L["SECONDARY_POWER_BAR_EDIT_MODE_NAME"],
     frameName = "SecondaryResourceBar",
     frameLevel = 2,
     defaultValues = {
@@ -218,9 +219,9 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
 
         return {
             {
-                parentId = "Bar Visibility",
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
                 order = 103,
-                name = "Hide Mana On Role",
+                name = L["HIDE_MANA_ON_ROLE"],
                 kind = LEM.SettingType.MultiDropdown,
                 default = defaults.hideManaOnRole,
                 values = addonTable.availableRoleOptions,
@@ -235,9 +236,9 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                 end,
             },
             {
-                parentId = "Bar Visibility",
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
                 order = 105,
-                name = "Hide Blizzard UI",
+                name = L["HIDE_BLIZZARD_UI"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.hideBlizzardSecondaryResourceUi,
                 get = function(layoutName)
@@ -253,12 +254,12 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                     SenseiClassResourceBarDB[dbName][layoutName].hideBlizzardSecondaryResourceUi = value
                     bar:HideBlizzardSecondaryResource(layoutName)
                 end,
-                tooltip = "Hides the default Blizzard secondary resource UI (e.g. Rune Frame for Death Knights)",
+                tooltip = L["HIDE_BLIZZARD_UI_SECONDARY_POWER_BAR_TOOLTIP"],
             },
             {
-                parentId = "Position & Size",
+                parentId = L["CATEGORY_POSITION_AND_SIZE"],
                 order = 201,
-                name = "Position",
+                name = L["POSITION"],
                 kind = LEM.SettingType.Dropdown,
                 default = defaults.positionMode,
                 useOldStyle = true,
@@ -273,14 +274,14 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                 end,
             },
             {
-                parentId = "Bar Settings",
+                parentId = L["CATEGORY_BAR_SETTINGS"],
                 order = 304,
                 kind = LEM.SettingType.Divider,
             },
             {
-                parentId = "Bar Settings",
+                parentId = L["CATEGORY_BAR_SETTINGS"],
                 order = 305,
-                name = "Show Ticks When Available",
+                name = L["SHOW_TICKS_WHEN_AVAILABLE"],
                 kind = LEM.SettingType.CheckboxColor,
                 default = defaults.showTicks,
                 colorDefault = defaults.tickColor,
@@ -308,9 +309,9 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                 end,
             },
             {
-                parentId = "Bar Settings",
+                parentId = L["CATEGORY_BAR_SETTINGS"],
                 order = 306,
-                name = "Tick Thickness",
+                name = L["TICK_THICKNESS"],
                 kind = LEM.SettingType.Slider,
                 default = defaults.tickThickness,
                 minValue = 1,
@@ -331,9 +332,9 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                 end,
             },
             {
-                parentId = "Bar Style",
+                parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,
-                name = "Use Resource Texture And Color",
+                name = L["USE_RESOURCE_TEXTURE_AND_COLOR"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.useResourceAtlas,
                 get = function(layoutName)
@@ -351,9 +352,9 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                 end,
             },
             {
-                parentId = "Text Settings",
+                parentId = L["CATEGORY_TEXT_SETTINGS"],
                 order = 505,
-                name = "Show Mana As Percent",
+                name = L["SHOW_MANA_AS_PERCENT"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.showManaAsPercent,
                 get = function(layoutName)
@@ -373,17 +374,17 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                     local data = SenseiClassResourceBarDB[dbName][layoutName]
                     return data.showText
                 end,
-                tooltip = "Force the Percent format on Mana",
+                tooltip = L["SHOW_MANA_AS_PERCENT_TOOLTIP"],
             },
             {
-                parentId = "Text Settings",
+                parentId = L["CATEGORY_TEXT_SETTINGS"],
                 order = 506,
                 kind = LEM.SettingType.Divider,
             },
             {
-                parentId = "Text Settings",
+                parentId = L["CATEGORY_TEXT_SETTINGS"],
                 order = 507,
-                name = "Show Resource Charge Timer (e.g. Runes)",
+                name = L["SHOW_RESOURCE_CHARGE_TIMER"],
                 kind = LEM.SettingType.CheckboxColor,
                 default = defaults.showFragmentedPowerBarText,
                 colorDefault = defaults.fragmentedPowerBarTextColor,
@@ -411,9 +412,9 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
                 end,
             },
             {
-                parentId = "Text Settings",
+                parentId = L["CATEGORY_TEXT_SETTINGS"],
                 order = 508,
-                name = "Charge Timer Precision",
+                name = L["CHARGE_TIMER_PRECISION"],
                 kind = LEM.SettingType.Dropdown,
                 default = defaults.fragmentedPowerBarTextPrecision,
                 useOldStyle = true,

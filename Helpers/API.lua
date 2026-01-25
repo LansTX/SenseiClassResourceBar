@@ -3,6 +3,7 @@ local addonName, addonTable = ...
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
 local LibSerialize = addonTable.LibSerialize or LibStub("LibSerialize")
 local LibDeflate = addonTable.LibDeflate or LibStub("LibDeflate")
+local L = addonTable.L
 
 local EXPORT_VERSION = 1
 
@@ -38,28 +39,28 @@ end
 addonTable.decodeImportString = function(importString)
     local prefix, version, encoded = importString:match("^([^:]+):(%d+):(.+)$")
     if prefix ~= addonName then
-        return nil, "This import string is not suitable for " .. addonName
+        return nil, L["IMPORT_STRING_NOT_SUITABLE"] .. ' ' .. addonName
     end
     if not version or version ~= tostring(EXPORT_VERSION) then
-        return nil, "This import string is meant for an older version of " .. addonName
+        return nil, L["IMPORT_STRING_OLDER_VERSION"] .. ' ' .. addonName
     end
     if not encoded then
-        return nil, "Invalid import string"
+        return nil, L["IMPORT_STRING_INVALID"]
     end
 
     local compressed = LibDeflate:DecodeForPrint(encoded)
     if not compressed then
-        return nil, "Decode failed"
+        return nil, L["IMPORT_DECODE_FAILED"]
     end
 
     local serialized = LibDeflate:DecompressDeflate(compressed)
     if not serialized then
-        return nil, "Decompression failed"
+        return nil, L["IMPORT_DECOMPRESSION_FAILED"]
     end
 
     local success, data = LibSerialize:Deserialize(serialized)
     if not success then
-        return nil, "Deserialization failed"
+        return nil, L["IMPORT_DESERIALIZATION_FAILED"]
     end
 
     return data

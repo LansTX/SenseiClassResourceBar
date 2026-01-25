@@ -2,6 +2,7 @@ local _, addonTable = ...
 
 local LSM = addonTable.LSM or LibStub("LibSharedMedia-3.0")
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
+local L = addonTable.L
 
 local LEMSettingsLoaderMixin = {}
 
@@ -15,14 +16,14 @@ local function BuildLemSettings(bar, defaults)
     local settings = {
         {
             order = 100,
-            name = "Bar Visibility",
+            name = L["CATEGORY_BAR_VISIBILITY"],
             kind = LEM.SettingType.Collapsible,
-            id = "Bar Visibility",
+            id = L["CATEGORY_BAR_VISIBILITY"],
         },
         {
-            parentId = "Bar Visibility",
+            parentId = L["CATEGORY_BAR_VISIBILITY"],
             order = 101,
-            name = "Bar Visible",
+            name = L["BAR_VISIBLE"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.barVisible,
             useOldStyle = true,
@@ -36,9 +37,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Bar Visibility",
+            parentId = L["CATEGORY_BAR_VISIBILITY"],
             order = 102,
-            name = "Bar Strata",
+            name = L["BAR_STRATA"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.barStrata,
             useOldStyle = true,
@@ -51,12 +52,12 @@ local function BuildLemSettings(bar, defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].barStrata = value
                 bar:ApplyLayout(layoutName)
             end,
-            tooltip = "The layer the bar is rendered on",
+            tooltip = L["BAR_STRATA_TOOLTIP"],
         },
         {
-            parentId = "Bar Visibility",
+            parentId = L["CATEGORY_BAR_VISIBILITY"],
             order = 104,
-            name = "Hide While Mounted Or In Vehicule",
+            name = L["HIDE_WHILE_MOUNTED_OR_VEHICULE"],
             kind = LEM.SettingType.Checkbox,
             default = defaults.hideWhileMountedOrVehicule,
             get = function(layoutName)
@@ -71,18 +72,18 @@ local function BuildLemSettings(bar, defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].hideWhileMountedOrVehicule = value
             end,
-            tooltip = "Includes Druid Travel Form",
+            tooltip = L["HIDE_WHILE_MOUNTED_OR_VEHICULE_TOOLTIP"],
         },
         {
             order = 200,
-            name = "Position & Size",
+            name = L["CATEGORY_POSITION_AND_SIZE"],
             kind = LEM.SettingType.Collapsible,
-            id = "Position & Size",
+            id = L["CATEGORY_POSITION_AND_SIZE"],
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 202,
-            name = "X Position",
+            name = L["X_POSITION"],
             kind = LEM.SettingType.Slider,
             default = defaults.x,
             minValue = uiWidth * -1,
@@ -100,9 +101,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 203,
-            name = "Y Position",
+            name = L["Y_POSITION"],
             kind = LEM.SettingType.Slider,
             default = defaults.y,
             minValue = uiHeight * -1,
@@ -120,9 +121,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 204,
-            name = "Relative Frame",
+            name = L["RELATIVE_FRAME"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.relativeFrame,
             useOldStyle = true,
@@ -139,14 +140,14 @@ local function BuildLemSettings(bar, defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].point = defaults.point
                 SenseiClassResourceBarDB[config.dbName][layoutName].relativePoint = defaults.relativePoint
                 bar:ApplyLayout(layoutName)
-                LEM.internal:RefreshSettingValues({"X Position", "Y Position", "Anchor Point", "Relative Point"})
+                LEM.internal:RefreshSettingValues({L["X_POSITION"], L["Y_POSITION"], L["ANCHOR_POINT"], L["RELATIVE_POINT"]})
             end,
-            tooltip = "Due to limitations, you may not drag the frame if anchored to another frame than UIParent. Use the X/Y sliders",
+            tooltip = L["RELATIVE_FRAME_TOOLTIP"],
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 205,
-            name = "Anchor Point",
+            name = L["ANCHOR_POINT"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.point,
             useOldStyle = true,
@@ -161,9 +162,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 206,
-            name = "Relative Point",
+            name = L["RELATIVE_POINT"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.relativePoint,
             useOldStyle = true,
@@ -178,14 +179,14 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 210,
             kind = LEM.SettingType.Divider,
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 211,
-            name = "Bar Size",
+            name = L["BAR_SIZE"],
             kind = LEM.SettingType.Slider,
             default = defaults.scale,
             minValue = 0.25,
@@ -205,9 +206,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 212,
-            name = "Width Mode",
+            name = L["WIDTH_MODE"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.widthMode,
             useOldStyle = true,
@@ -222,9 +223,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 213,
-            name = "Width",
+            name = L["WIDTH"],
             kind = LEM.SettingType.Slider,
             default = defaults.width,
             minValue = 1,
@@ -246,9 +247,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 214,
-            name = "Minimum Width",
+            name = L["MINIMUM_WIDTH"],
             kind = LEM.SettingType.Slider,
             default = defaults.minWidth,
             minValue = 0,
@@ -264,16 +265,16 @@ local function BuildLemSettings(bar, defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].minWidth = addonTable.rounded(value)
                 bar:ApplyLayout(layoutName)
             end,
-            tooltip = "0 to disable. Only active if synced to the Cooldown Manager",
+            tooltip = L["MINIMUM_WIDTH_TOOLTIP"],
             isEnabled = function (layoutName)
                 local data = SenseiClassResourceBarDB[config.dbName][layoutName]
                 return data.widthMode == "Sync With Essential Cooldowns" or data.widthMode == "Sync With Utility Cooldowns" 
             end,
         },
         {
-            parentId = "Position & Size",
+            parentId = L["CATEGORY_POSITION_AND_SIZE"],
             order = 215,
-            name = "Height",
+            name = L["HEIGHT"],
             kind = LEM.SettingType.Slider,
             default = defaults.height,
             minValue = 1,
@@ -292,15 +293,15 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             order = 300,
-            name = "Bar Settings",
+            name = L["CATEGORY_BAR_SETTINGS"],
             kind = LEM.SettingType.Collapsible,
-            id = "Bar Settings",
+            id = L["CATEGORY_BAR_SETTINGS"],
             defaultCollapsed = true,
         },
         {
-            parentId = "Bar Settings",
+            parentId = L["CATEGORY_BAR_SETTINGS"],
             order = 301,
-            name = "Fill Direction",
+            name = L["FILL_DIRECTION"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.fillDirection,
             useOldStyle = true,
@@ -315,9 +316,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Bar Settings",
+            parentId = L["CATEGORY_BAR_SETTINGS"],
             order = 302,
-            name = "Faster Updates (Higher CPU Usage)",
+            name = L["FASTER_UPDATES"],
             kind = LEM.SettingType.Checkbox,
             default = defaults.fasterUpdates,
             get = function(layoutName)
@@ -339,9 +340,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Bar Settings",
+            parentId = L["CATEGORY_BAR_SETTINGS"],
             order = 303,
-            name = "Smooth Progress",
+            name = L["SMOOTH_PROGRESS"],
             kind = LEM.SettingType.Checkbox,
             default = defaults.smoothProgress,
             get = function(layoutName)
@@ -359,15 +360,15 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             order = 400,
-            name = "Bar Style",
+            name = L["CATEGORY_BAR_STYLE"],
             kind = LEM.SettingType.Collapsible,
-            id = "Bar Style",
+            id = L["CATEGORY_BAR_STYLE"],
             defaultCollapsed = true,
         },
         {
-            parentId = "Bar Style",
+            parentId = L["CATEGORY_BAR_STYLE"],
             order = 405,
-            name = "Border",
+            name = L["BORDER"],
             kind = LEM.SettingType.DropdownColor,
             default = defaults.maskAndBorderStyle,
             colorDefault = defaults.borderColor,
@@ -392,9 +393,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Bar Style",
+            parentId = L["CATEGORY_BAR_STYLE"],
             order = 403,
-            name = "Background",
+            name = L["BACKGROUND"],
             kind = LEM.SettingType.DropdownColor,
             default = defaults.backgroundStyle,
             colorDefault = defaults.backgroundColor,
@@ -469,9 +470,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Bar Style",
+            parentId = L["CATEGORY_BAR_STYLE"],
             order = 404,
-            name = "Use Bar Color For Background Color",
+            name = L["USE_BAR_COLOR_FOR_BACKGROUND_COLOR"],
             kind = LEM.SettingType.Checkbox,
             default = defaults.useStatusBarColorForBackgroundColor,
             get = function(layoutName)
@@ -489,9 +490,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Bar Style",
+            parentId = L["CATEGORY_BAR_STYLE"],
             order = 402,
-            name = "Bar Texture",
+            name = L["BAR_TEXTURE"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.foregroundStyle,
             useOldStyle = true,
@@ -561,15 +562,15 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             order = 500,
-            name = "Text Settings",
+            name = L["CATEGORY_TEXT_SETTINGS"],
             kind = LEM.SettingType.Collapsible,
-            id = "Text Settings",
+            id = L["CATEGORY_TEXT_SETTINGS"],
             defaultCollapsed = true,
         },
         {
-            parentId = "Text Settings",
+            parentId = L["CATEGORY_TEXT_SETTINGS"],
             order = 501,
-            name = "Show Resource Number",
+            name = L["SHOW_RESOURCE_NUMBER"],
             kind = LEM.SettingType.CheckboxColor,
             default = defaults.showText,
             colorDefault = defaults.textColor,
@@ -597,9 +598,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Text Settings",
+            parentId = L["CATEGORY_TEXT_SETTINGS"],
             order = 502,
-            name = "Format",
+            name = L["RESOURCE_NUMBER_FORMAT"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.textFormat,
             useOldStyle = true,
@@ -618,9 +619,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Text Settings",
+            parentId = L["CATEGORY_TEXT_SETTINGS"],
             order = 503,
-            name = "Precision",
+            name = L["RESOURCE_NUMBER_PRECISION"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.textPrecision,
             useOldStyle = true,
@@ -639,9 +640,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Text Settings",
+            parentId = L["CATEGORY_TEXT_SETTINGS"],
             order = 504,
-            name = "Alignment",
+            name = L["RESOURCE_NUMBER_ALIGNMENT"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.textAlign,
             useOldStyle = true,
@@ -661,15 +662,15 @@ local function BuildLemSettings(bar, defaults)
         },
         {
             order = 600,
-            name = "Font",
+            name = L["CATEGORY_FONT"],
             kind = LEM.SettingType.Collapsible,
-            id = "Font",
+            id = L["CATEGORY_FONT"],
             defaultCollapsed = true,
         },
         {
-            parentId = "Font",
+            parentId = L["CATEGORY_FONT"],
             order = 601,
-            name = "Font",
+            name = L["FONT"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.font,
             useOldStyle = true,
@@ -737,9 +738,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Font",
+            parentId = L["CATEGORY_FONT"],
             order = 602,
-            name = "Size",
+            name = L["FONT_SIZE"],
             kind = LEM.SettingType.Slider,
             default = defaults.fontSize,
             minValue = 5,
@@ -756,9 +757,9 @@ local function BuildLemSettings(bar, defaults)
             end,
         },
         {
-            parentId = "Font",
+            parentId = L["CATEGORY_FONT"],
             order = 603,
-            name = "Outline",
+            name = L["FONT_OUTLINE"],
             kind = LEM.SettingType.Dropdown,
             default = defaults.fontOutline,
             useOldStyle = true,
@@ -806,7 +807,7 @@ function LEMSettingsLoaderMixin:Init(bar, defaults)
         SenseiClassResourceBarDB[config.dbName][layoutName].x = x
         SenseiClassResourceBarDB[config.dbName][layoutName].y = y
         bar:ApplyLayout(layoutName)
-        LEM.internal:RefreshSettingValues({"X Position", "Y Position"})
+        LEM.internal:RefreshSettingValues({L["X_POSITION"], L["Y_POSITION"]})
     end
 
     LEM:RegisterCallback("enter", function()
@@ -885,7 +886,7 @@ function LEMSettingsLoaderMixin:LoadSettings()
             text = "Power Color Settings",
             click = function() -- Cannot directly close Edit Mode because it is protected
                 if not addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit then
-                    addonTable.prettyPrint('Settings will open after leaving Edit Mode')
+                    addonTable.prettyPrint(L["SETTING_OPEN_AFTER_EDIT_MODE_CLOSE"])
                 end
 
                 addonTable._SCRB_EditModeManagerFrame_OnHide_openSettingsOnExit = true
@@ -906,17 +907,17 @@ function LEMSettingsLoaderMixin:LoadSettings()
             end
         },
         {
-            text = "Export This Bar",
+            text = L["EXPORT_BAR"],
             click = function()
                 local exportString = addonTable.exportBarAsString(self.bar:GetConfig().dbName)
                 if not exportString then
-                    addonTable.prettyPrint("Export failed.")
+                    addonTable.prettyPrint(L["EXPORT_FAILED"])
                     return
                 end
                 StaticPopupDialogs["SCRB_EXPORT_SETTINGS"] = StaticPopupDialogs["SCRB_EXPORT_SETTINGS"]
                     or {
-                        text = "Export",
-                        button1 = CLOSE,
+                        text = L["EXPORT"],
+                        button1 = L["CLOSE"],
                         hasEditBox = true,
                         editBoxWidth = 320,
                         timeout = 0,
@@ -935,14 +936,14 @@ function LEMSettingsLoaderMixin:LoadSettings()
             end,
         },
         {
-            text = "Import This Bar",
+            text = L["IMPORT_BAR"],
             click = function()
                 local dbName = self.bar:GetConfig().dbName
                 StaticPopupDialogs["SCRB_IMPORT_SETTINGS"] = StaticPopupDialogs["SCRB_IMPORT_SETTINGS"]
 				or {
-					text = "Import",
-					button1 = OKAY,
-					button2 = CANCEL,
+					text = L["IMPORT"],
+					button1 = L["OKAY"],
+					button2 = L["CANCEL"],
 					hasEditBox = true,
 					editBoxWidth = 320,
 					timeout = 0,
@@ -966,7 +967,7 @@ function LEMSettingsLoaderMixin:LoadSettings()
 
                     local ok, error = addonTable.importBarAsString(input, dbName)
                     if not ok then
-                        addonTable.prettyPrint("Import failed with the following error: "..error)
+					    addonTable.prettyPrint(L["IMPORT_FAILED_WITH_ERROR"] .. error)
                     end
 
                     addonTable.fullUpdateBars()

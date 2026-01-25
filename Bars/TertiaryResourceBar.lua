@@ -1,6 +1,7 @@
 local _, addonTable = ...
 
 local LEM = addonTable.LEM or LibStub("LibEQOLEditMode-1.0")
+local L = addonTable.L
 
 local TertiaryResourceBarMixin = Mixin({}, addonTable.PowerBarMixin)
 
@@ -78,7 +79,7 @@ addonTable.RegisteredBar = addonTable.RegisteredBar or {}
 addonTable.RegisteredBar.TertiaryResourceBar = {
     mixin = addonTable.TertiaryResourceBarMixin,
     dbName = "tertiaryResourceBarDB",
-    editModeName = "Ebon Might Bar",
+    editModeName = L["TERNARY_POWER_BAR_EDIT_MODE_NAME"],
     frameName = "TertiaryResourceBar",
     frameLevel = 1,
     defaultValues = {
@@ -101,9 +102,9 @@ addonTable.RegisteredBar.TertiaryResourceBar = {
 
         return {
             {
-                parentId = "Bar Style",
+                parentId = L["CATEGORY_BAR_STYLE"],
                 order = 401,
-                name = "Use Resource Texture And Color",
+                name = L["USE_RESOURCE_TEXTURE_AND_COLOR"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.useResourceAtlas,
                 get = function(layoutName)
