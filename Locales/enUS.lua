@@ -57,8 +57,9 @@ local baseLocale = {
     ["STAGGER_MEDIUM"] ="Medium Stagger",
     ["STAGGER_HIGH"] = "High Stagger",
     ["ARCANE_CHARGES"] = POWER_TYPE_ARCANE_CHARGES,
-    ["SOUL_FRAGMENTS"] = "Soul Fragments",
-    ["SOUL_FRAGMENTS_VOIC_META"] = "Soul Fragments Void Meta.",
+    ["SOUL_FRAGMENTS_VENGEANCE"] = "Vengeance Soul Fragments",
+    ["SOUL_FRAGMENTS_DDH"] = "Devorer Soul Fragments",
+    ["SOUL_FRAGMENTS_VOIC_META"] = "Devorer Soul Fragments Void Meta.",
     ["ESSENCE"]= POWER_TYPE_ESSENCE,
     ["EBON_MIGHT"] = "Ebon Might",
 
