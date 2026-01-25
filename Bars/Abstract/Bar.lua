@@ -474,9 +474,12 @@ function BarMixin:GetPoint(layoutName)
     local relativePoint = data.relativePoint or defaults.relativePoint
     local relativeFrame = data.relativeFrame or defaults.relativeFrame
     local resolvedRelativeFrame = addonTable.resolveRelativeFrames(relativeFrame) or UIParent
-    -- Cannot anchor to itself
-    if self.Frame == resolvedRelativeFrame then
+    -- Cannot anchor to itself or to a frame already anchored to this frame
+    if self.Frame == resolvedRelativeFrame or self.Frame == select(2, resolvedRelativeFrame:GetPoint(1)) then
         resolvedRelativeFrame = UIParent
+        data.relativeFrame = "UIParent"
+        LEM.internal:RefreshSettingValues({"Relative Frame"})
+        addonTable.prettyPrint("Cannot change Relative Frame as the selected Frame is already relative to this Frame.")
     end
 
     local uiWidth, uiHeight = UIParent:GetWidth() / 2, UIParent:GetHeight() / 2

@@ -133,10 +133,13 @@ local function BuildLemSettings(bar, defaults)
             set = function(layoutName, value)
                 SenseiClassResourceBarDB[config.dbName][layoutName] = SenseiClassResourceBarDB[config.dbName][layoutName] or CopyTable(defaults)
                 SenseiClassResourceBarDB[config.dbName][layoutName].relativeFrame = value
+                -- Need to reset some settings so it does not go somewhere unintended
                 SenseiClassResourceBarDB[config.dbName][layoutName].x = defaults.x
                 SenseiClassResourceBarDB[config.dbName][layoutName].y = defaults.y
+                SenseiClassResourceBarDB[config.dbName][layoutName].point = defaults.point
+                SenseiClassResourceBarDB[config.dbName][layoutName].relativePoint = defaults.relativePoint
                 bar:ApplyLayout(layoutName)
-                LEM.internal:RefreshSettingValues({"X Position", "Y Position"})
+                LEM.internal:RefreshSettingValues({"X Position", "Y Position", "Anchor Point", "Relative Point"})
             end,
             tooltip = "Due to limitations, you may not drag the frame if anchored to another frame than UIParent. Use the X/Y sliders",
         },
