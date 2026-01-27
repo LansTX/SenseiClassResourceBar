@@ -729,7 +729,8 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
 
         -- Linear multiplier: for example, thickness grows 1x at scale 1, 2x at scale 2
         local thickness = (style.thickness or 1) * math.max(data.scale or defaults.scale, 1)
-        thickness = math.max(thickness, 1)
+        local ppScale = addonTable.getPixelPerfectScale()
+        local pThickness = math.max(addonTable.rounded(thickness), 1) * ppScale
 
         local borderColor = data.borderColor or defaults.borderColor
 
@@ -740,9 +741,9 @@ function BarMixin:ApplyMaskAndBorderSettings(layoutName, data)
             t:SetPoint(points[2], self.Frame, points[2])
             t:SetColorTexture(borderColor.r or 0, borderColor.g or 0, borderColor.b or 0, borderColor.a or 1)
             if edge == "top" or edge == "bottom" then
-                t:SetHeight(thickness)
+                t:SetHeight(pThickness)
             else
-                t:SetWidth(thickness)
+                t:SetWidth(pThickness)
             end
             t:Show()
         end
@@ -903,6 +904,8 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
 
     local tickThickness = data.tickThickness or defaults.tickThickness or 1
     local tickColor = data.tickColor or defaults.tickColor
+    local ppScale = addonTable.getPixelPerfectScale()
+    local pThickness = tickThickness * ppScale
 
     local needed = max - 1
     for i = 1, needed do
@@ -914,13 +917,15 @@ function BarMixin:UpdateTicksLayout(layoutName, data)
         t:SetColorTexture(tickColor.r or 0, tickColor.g or 0, tickColor.b or 0, tickColor.a or 1)
         t:ClearAllPoints()
         if self.StatusBar:GetOrientation() == "VERTICAL" then
-            local y = (i / max) * height
-            t:SetSize(width, tickThickness)
-            t:SetPoint("BOTTOM", self.StatusBar, "BOTTOM", 0, y - (tickThickness) / 2)
+            local rawY = (i / max) * height
+            local snappedY = addonTable.rounded(rawY / ppScale) * ppScale
+            t:SetSize(width, pThickness)
+            t:SetPoint("BOTTOM", self.StatusBar, "BOTTOM", 0, snappedY)
         else
-            local x = (i / max) * width
-            t:SetSize(tickThickness, height)
-            t:SetPoint("LEFT", self.StatusBar, "LEFT", x - (tickThickness) / 2, 0)
+            local rawX = (i / max) * width
+            local snappedX = addonTable.rounded(rawX / ppScale) * ppScale
+            t:SetSize(pThickness, height)
+            t:SetPoint("LEFT", self.StatusBar, "LEFT", snappedX, 0)
         end
         t:Show()
     end
