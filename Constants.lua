@@ -103,10 +103,21 @@ addonTable.availableRoleOptions = {
     { text = "DPS", value = "DAMAGER" },
 }
 
-addonTable.availablePositionModeOptions = {
-    { text = "Self" },
-    { text = "Use Primary Resource Bar Position If Hidden" },
-}
+addonTable.availablePositionModeOptions = function(config)
+    local positions = {
+        { text = "Self" },
+    }
+
+    if config.frameName == "HealthBar" then
+        table.insert(positions, { text = "Use Primary Resource Bar Position If Hidden" })
+        table.insert(positions, { text = "Use Secondary Resource Bar Position If Hidden" })
+    elseif config.frameName == "SecondaryResourceBar" then
+        table.insert(positions, { text = "Use Primary Resource Bar Position If Hidden" })
+        table.insert(positions, { text = "Use Health Bar Position If Hidden" })
+    end
+
+    return positions;
+end
 
 addonTable.availableRelativeFrames = function(config)
     local frames = {
