@@ -32,27 +32,27 @@ function PrimaryResourceBarMixin:GetResource()
             [DRUID_MOONKIN_FORM_1]  = Enum.PowerType.LunarPower,
             [DRUID_MOONKIN_FORM_2]  = Enum.PowerType.LunarPower,
         },
-        ["EVOKER"]      = Enum.PowerType.Mana,
+        ["EVOKER"]      = Enum.PowerType.Essence,
         ["HUNTER"]      = Enum.PowerType.Focus,
-        ["MAGE"]        = Enum.PowerType.Mana,
+        ["MAGE"]        = Enum.PowerType.ArcaneCharges,
         ["MONK"]        = {
             [268] = Enum.PowerType.Energy, -- Brewmaster
-            [269] = Enum.PowerType.Energy, -- Windwalker
+            [269] = Enum.PowerType.Chi, -- Windwalker
             [270] = Enum.PowerType.Mana, -- Mistweaver
         },
-        ["PALADIN"]     = Enum.PowerType.Mana,
+        ["PALADIN"]     = Enum.PowerType.HolyPower,
         ["PRIEST"]      = {
             [256] = Enum.PowerType.Mana, -- Disciple
             [257] = Enum.PowerType.Mana, -- Holy,
             [258] = Enum.PowerType.Insanity, -- Shadow,
         },
-        ["ROGUE"]       = Enum.PowerType.Energy,
+        ["ROGUE"]       = Enum.PowerType.ComboPoints,
         ["SHAMAN"]      = {
             [262] = Enum.PowerType.Maelstrom, -- Elemental
             [263] = Enum.PowerType.Mana, -- Enhancement
             [264] = Enum.PowerType.Mana, -- Restoration
         },
-        ["WARLOCK"]     = Enum.PowerType.Mana,
+        ["WARLOCK"]     = Enum.PowerType.SoulShards,
         ["WARRIOR"]     = Enum.PowerType.Rage,
     }
 
