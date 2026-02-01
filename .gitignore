@@ -1,5 +1,5 @@
 .vscode/
 Libs/*
-.release/*
+.release/
 
 .env
