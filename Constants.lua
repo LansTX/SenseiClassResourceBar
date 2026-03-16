@@ -106,6 +106,14 @@ addonTable.availableRoleOptions = {
     { text = L["DPS"], value = "DAMAGER" },
 }
 
+addonTable.availableCustomResources = {
+    { text = L["TIP_OF_THE_SPEAR"], value = "TIP_OF_THE_SPEAR" },
+    { text = L["ICICLES"], value = "ICICLES" },
+    { text = L["WHIRLWIND"], value = "WHIRLWIND" },
+    { text = L["SOUL_FRAGMENTS_VENGEANCE"], value = "SOUL_FRAGMENTS_VENGEANCE" },
+    { text = L["MAELSTROM_WEAPON"], value = "MAELSTROM_WEAPON" },
+}
+
 addonTable.availablePositionModeOptions = function(config)
     local positions = {
         { text = L["POSITION_SELF"], value = "Self" },
@@ -339,6 +347,7 @@ addonTable.availableHealAbsorbBarPositions = {
 -- Power types that should show discrete ticks
 addonTable.tickedPowerTypes = {
     [Enum.PowerType.ArcaneCharges] = true,
+    ["ICICLES"] = true,
     [Enum.PowerType.Chi] = true,
     [Enum.PowerType.ComboPoints] = true,
     [Enum.PowerType.Essence] = true,

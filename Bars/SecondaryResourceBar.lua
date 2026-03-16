@@ -9,7 +9,6 @@ function SecondaryResourceBarMixin:OnLoad()
     addonTable.PowerBarMixin.OnLoad(self)
 
     -- Modules for the special cases requiring more work
-    addonTable.TipOfTheSpear:OnLoad(self)
     addonTable.Whirlwind:OnLoad(self)
 end
 
@@ -17,7 +16,6 @@ function SecondaryResourceBarMixin:OnEvent(event, ...)
     addonTable.PowerBarMixin.OnEvent(self, event, ...)
 
     -- Modules for the special cases requiring more work
-    addonTable.TipOfTheSpear:OnEvent(self, event, ...)
     addonTable.Whirlwind:OnEvent(self, event, ...)
 end
 
@@ -42,7 +40,8 @@ function SecondaryResourceBarMixin:GetResource()
             [255] = "TIP_OF_THE_SPEAR", -- Survival
         },
         ["MAGE"]        = {
-            [62]   = Enum.PowerType.Mana, -- Arcane
+            [62]   = Enum.PowerType.ArcaneCharges, -- Arcane
+            [64]   = "ICICLES", -- Frost
         },
         ["MONK"]        = {
             [268]  = "STAGGER", -- Brewmaster
@@ -172,7 +171,19 @@ function SecondaryResourceBarMixin:GetResourceValue(resource)
     end
 
     if resource == "TIP_OF_THE_SPEAR" then
-        return addonTable.TipOfTheSpear:GetStacks()
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(260286) -- Tip of the Spear
+        local current = auraData and auraData.applications or 0
+        local max = 3
+
+        return max, current
+    end
+
+    if resource == "ICICLES" then
+        local auraData = C_UnitAuras.GetPlayerAuraBySpellID(205473) -- Icicles
+        local current = auraData and auraData.applications or 0
+        local max = 5
+
+        return max, current
     end
 
     if resource == "WHIRLWIND" then
@@ -286,6 +297,7 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
         y = -40,
         hideBlizzardSecondaryResourceUi = false,
         hideManaOnRole = {},
+        hideCustomResources = {},
         showManaAsPercent = false,
         showTicks = true,
         tickColor = {r = 0, g = 0, b = 0, a = 1},
@@ -316,7 +328,24 @@ addonTable.RegisteredBar.SecondaryResourceBar = {
             },
             {
                 parentId = L["CATEGORY_BAR_VISIBILITY"],
-                order = 105,
+                order = 104,
+                name = L["HIDE_CUSTOM_RESOURCES"],
+                kind = LEM.SettingType.MultiDropdown,
+                default = defaults.hideCustomResources,
+                values = addonTable.availableCustomResources,
+                hideSummary = true,
+                useOldStyle = true,
+                get = function(layoutName)
+                    return (SenseiClassResourceBarDB[dbName][layoutName] and SenseiClassResourceBarDB[dbName][layoutName].hideCustomResources) or defaults.hideCustomResources
+                end,
+                set = function(layoutName, value)
+                    SenseiClassResourceBarDB[dbName][layoutName] = SenseiClassResourceBarDB[dbName][layoutName] or CopyTable(defaults)
+                    SenseiClassResourceBarDB[dbName][layoutName].hideCustomResources = value
+                end,
+            },
+            {
+                parentId = L["CATEGORY_BAR_VISIBILITY"],
+                order = 106,
                 name = L["HIDE_BLIZZARD_UI"],
                 kind = LEM.SettingType.Checkbox,
                 default = defaults.hideBlizzardSecondaryResourceUi,
